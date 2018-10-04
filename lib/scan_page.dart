@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 
-class ScanScreen extends StatefulWidget {
-  ScanScreen({Key key}) : super(key: key);
+class ScanPage extends StatefulWidget {
+  ScanPage({Key key}) : super(key: key);
 
   @override
-  _ScanScreenState createState() => new _ScanScreenState();
+  _ScanPageState createState() => new _ScanPageState();
 }
 
-class _ScanScreenState extends State<ScanScreen> {
+class _ScanPageState extends State<ScanPage> {
   List<CameraDescription> cameras;
   CameraController controller;
 
