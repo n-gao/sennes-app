@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'item.dart';
 
 class StartPage extends StatefulWidget {
   StartPage({Key key, this.title}) : super(key: key);
@@ -19,10 +20,12 @@ class StartPage extends StatefulWidget {
 }
 
 class _StartPageState extends State<StartPage> {
-  final items = List<String>.generate(1000, (i) => "Item ${i + 1}");
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final items = List<Item>.generate(10, (i) => Item("Name", amount: i+1));
+  final _scaffoldKey = new GlobalKey<ScaffoldState>();
   bool visible = true;
   PersistentBottomSheetController addDialog;
+  final _formKey = GlobalKey<FormState>();
+  String toAdd = "";
 
   String getTitle() {
     if (!visible) {
@@ -38,10 +41,18 @@ class _StartPageState extends State<StartPage> {
         new IconButton(
           icon: Icon(Icons.check),
           onPressed: () {
-            setState(() {
-              addDialog?.close();
-              addDialog = null;
-            });
+            if (_formKey.currentState.validate()) {
+              _formKey.currentState.save();
+              setState(() {
+                if (items.contains(toAdd)) {
+                  items.firstWhere((i) => i.name == toAdd).amount += 1;
+                } else {
+                  items.add(Item(toAdd));
+                }
+                addDialog?.close();
+                addDialog = null;
+              });
+            }
           },
         )
       ];
@@ -53,23 +64,60 @@ class _StartPageState extends State<StartPage> {
     setState(() {
       visible = false;
     });
+
     addDialog = _scaffoldKey.currentState.showBottomSheet<Null>((builder) {
       return new Form(
-          child: Column(
-        children: <Widget>[
-          TextFormField(validator: (value) {
-            if (value.isEmpty) {
-              return "Please enter a name.";
-            }
-          }),
-        ],
-      ));
+          key: _formKey,
+          child: new Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Column(
+                children: <Widget>[
+                  TextFormField(
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      labelText: "Enter product name",
+                      hintText: "Milk",
+                    ),
+                    validator: (value) {
+                      if (value.isEmpty) {
+                        return "Please enter a name.";
+                      }
+                    },
+                    onSaved: (product) {
+                      toAdd = product;
+                    },
+                  ),
+                ],
+              )));
     });
+
     addDialog.closed.whenComplete(() {
       setState(() {
         visible = true;
       });
     });
+  }
+
+  Dismissible _buildItem(context, index) {
+    final item = items[index];
+    return Dismissible(
+      key: ObjectKey(item),
+      onDismissed: (direction) {
+        setState(() {
+          items.removeAt(index);
+        });
+        Scaffold.of(context).showSnackBar(SnackBar(
+          content: Text("$item has been dismised."),
+        ));
+      },
+      background: Container(
+        color: Colors.red,
+      ),
+      child: ListTile(
+        leading: Text("${item.amount}"),
+        title: Text("${item.name}"),
+      ),
+    );
   }
 
   @override
@@ -88,26 +136,7 @@ class _StartPageState extends State<StartPage> {
       ),
       body: ListView.builder(
         itemCount: items.length,
-        itemBuilder: (context, index) {
-          final item = items[index];
-          return Dismissible(
-            key: Key(item),
-            onDismissed: (direction) {
-              setState(() {
-                items.removeAt(index);
-              });
-              Scaffold.of(context).showSnackBar(SnackBar(
-                content: Text("$item has been dismised."),
-              ));
-            },
-            background: Container(
-              color: Colors.red,
-            ),
-            child: ListTile(
-              title: Text("$item"),
-            ),
-          );
-        },
+        itemBuilder: _buildItem,
       ),
       floatingActionButton: visible
           ? new FloatingActionButton(
