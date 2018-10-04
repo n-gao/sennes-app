@@ -20,14 +20,14 @@ class StartPage extends StatefulWidget {
 }
 
 class _StartPageState extends State<StartPage> {
-  final items = List<Item>.generate(10, (i) => Item("Name", amount: i+1));
+  final items = List<Item>.generate(5, (i) => Item("Name", amount: i + 1));
   final _scaffoldKey = new GlobalKey<ScaffoldState>();
   bool visible = true;
   PersistentBottomSheetController addDialog;
   final _formKey = GlobalKey<FormState>();
   String toAdd = "";
 
-  String getTitle() {
+  String _getTitle() {
     if (!visible) {
       return "Add Item";
     } else {
@@ -35,32 +35,36 @@ class _StartPageState extends State<StartPage> {
     }
   }
 
-  List<Widget> getActions() {
+  void _submit() {
+    if (_formKey.currentState.validate()) {
+      _formKey.currentState.save();
+      setState(() {
+        try {
+          Item item = items.firstWhere((i) => i.name == toAdd);
+          item.amount += 1;
+        } catch(Exception) {
+          items.add(Item(toAdd));
+          items.sort((i1, i2) => i1.name.compareTo(i2.name));
+        }
+        addDialog?.close();
+        addDialog = null;
+      });
+    }
+  }
+
+  List<Widget> _getActions() {
     if (!visible) {
       return [
         new IconButton(
           icon: Icon(Icons.check),
-          onPressed: () {
-            if (_formKey.currentState.validate()) {
-              _formKey.currentState.save();
-              setState(() {
-                if (items.contains(toAdd)) {
-                  items.firstWhere((i) => i.name == toAdd).amount += 1;
-                } else {
-                  items.add(Item(toAdd));
-                }
-                addDialog?.close();
-                addDialog = null;
-              });
-            }
-          },
+          onPressed: _submit,
         )
       ];
     }
     return [];
   }
 
-  void addItem() {
+  void _openAddItemDialog() {
     setState(() {
       visible = false;
     });
@@ -74,9 +78,10 @@ class _StartPageState extends State<StartPage> {
                 children: <Widget>[
                   TextFormField(
                     autofocus: true,
+                    keyboardType: TextInputType.text,
                     decoration: InputDecoration(
                       labelText: "Enter product name",
-                      hintText: "Milk",
+                      hintText: "e.g. Milk",
                     ),
                     validator: (value) {
                       if (value.isEmpty) {
@@ -86,6 +91,7 @@ class _StartPageState extends State<StartPage> {
                     onSaved: (product) {
                       toAdd = product;
                     },
+                    onFieldSubmitted: (value) {_submit();},
                   ),
                 ],
               )));
@@ -131,8 +137,8 @@ class _StartPageState extends State<StartPage> {
     return new Scaffold(
       key: _scaffoldKey,
       appBar: new AppBar(
-        title: new Text(getTitle()),
-        actions: getActions(),
+        title: new Text(_getTitle()),
+        actions: _getActions(),
       ),
       body: ListView.builder(
         itemCount: items.length,
@@ -140,7 +146,7 @@ class _StartPageState extends State<StartPage> {
       ),
       floatingActionButton: visible
           ? new FloatingActionButton(
-              onPressed: addItem,
+              onPressed: _openAddItemDialog,
               tooltip: 'Add Item',
               child: new Icon(Icons.add),
             )
