@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'scan_screen.dart';
 
 void main() => runApp(new MyApp());
 
@@ -7,7 +8,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-      title: 'Flutter Demo',
+      title: 'SenneS',
       theme: new ThemeData(
         // This is the theme of your application.
         //
@@ -20,6 +21,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: new MyHomePage(title: 'SenneS'),
+      // home: new ScanScreen(),
     );
   }
 }
