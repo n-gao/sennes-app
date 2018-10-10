@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'item.dart';
+import 'item_page.dart';
+import 'scan_page.dart';
+import 'package:gradient_app_bar/gradient_app_bar.dart';
 
 class StartPage extends StatefulWidget {
   StartPage({Key key, this.title}) : super(key: key);
@@ -19,24 +22,52 @@ class StartPage extends StatefulWidget {
   _StartPageState createState() => new _StartPageState();
 }
 
+enum _StartPagePopupMenu {
+  Settings
+}
+
+String _getStartPagePopupMenuName(_StartPagePopupMenu option) {
+  switch(option) {
+    case _StartPagePopupMenu.Settings:
+      return "Settings";
+    default:
+      return option.toString();
+  }
+}
+
+IconData _getStartPagePopupMenuIcon(_StartPagePopupMenu option) {
+  switch(option) {
+    case _StartPagePopupMenu.Settings:
+      return Icons.settings;
+    default:
+      return Icons.border_all;
+  }
+}
+
+ _getStartPagePopupMenuFunction(_StartPagePopupMenu option) {
+  switch(option) {
+    case _StartPagePopupMenu.Settings:
+      return (context) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ScanPage()),
+        );
+      };
+    default:
+      return (context) {};
+  }
+}
+
 class _StartPageState extends State<StartPage> {
   final items = List<Item>.generate(5, (i) => Item("Name", amount: i + 1));
   final _scaffoldKey = new GlobalKey<ScaffoldState>();
-  bool visible = true;
   PersistentBottomSheetController addDialog;
   final _formKey = GlobalKey<FormState>();
   String toAdd = "";
 
-  String _getTitle() {
-    if (!visible) {
-      return "Add Item";
-    } else {
-      return widget.title;
-    }
-  }
-
   void _submit() {
     if (_formKey.currentState.validate()) {
+      Navigator.pop(context);
       _formKey.currentState.save();
       setState(() {
         try {
@@ -46,61 +77,44 @@ class _StartPageState extends State<StartPage> {
           items.add(Item(toAdd));
           items.sort((i1, i2) => i1.name.compareTo(i2.name));
         }
-        addDialog?.close();
-        addDialog = null;
       });
     }
   }
 
-  List<Widget> _getActions() {
-    if (!visible) {
-      return [
-        new IconButton(
-          icon: Icon(Icons.check),
-          onPressed: _submit,
-        )
-      ];
-    }
-    return [];
-  }
 
   void _openAddItemDialog() {
-    setState(() {
-      visible = false;
-    });
-
-    addDialog = _scaffoldKey.currentState.showBottomSheet<Null>((builder) {
+    showModalBottomSheet(context: _scaffoldKey.currentContext, builder: (builder) {
       return new Form(
           key: _formKey,
           child: new Padding(
               padding: EdgeInsets.all(16.0),
               child: Column(
-                children: <Widget>[
-                  TextFormField(
-                    autofocus: true,
-                    keyboardType: TextInputType.text,
-                    decoration: InputDecoration(
-                      labelText: "Enter product name",
-                      hintText: "e.g. Milk",
+                children: [
+                  ListTile(
+                    title: TextFormField(
+                      autofocus: true,
+                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration(
+                        labelText: "Enter product name",
+                        hintText: "e.g. Milk",
+                      ),
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return "Please enter a name.";
+                        }
+                      },
+                      onSaved: (product) {
+                        toAdd = product;
+                      },
+                      onFieldSubmitted: (value) {_submit();},
                     ),
-                    validator: (value) {
-                      if (value.isEmpty) {
-                        return "Please enter a name.";
-                      }
-                    },
-                    onSaved: (product) {
-                      toAdd = product;
-                    },
-                    onFieldSubmitted: (value) {_submit();},
-                  ),
+                    trailing: IconButton(
+                      icon: Icon(Icons.send),
+                      onPressed: _submit,
+                    ),
+                  )
                 ],
               )));
-    });
-
-    addDialog.closed.whenComplete(() {
-      setState(() {
-        visible = true;
-      });
     });
   }
 
@@ -110,18 +124,29 @@ class _StartPageState extends State<StartPage> {
       key: ObjectKey(item),
       onDismissed: (direction) {
         setState(() {
-          items.removeAt(index);
+            items.removeAt(index);
         });
         Scaffold.of(context).showSnackBar(SnackBar(
-          content: Text("$item has been dismised."),
+          content: Text("${item.name} has been dismised."),
         ));
       },
       background: Container(
+        color: Colors.green,
+      ),
+      secondaryBackground: Container(
         color: Colors.red,
       ),
       child: ListTile(
-        leading: Text("${item.amount}"),
+        leading: CircleAvatar(
+          child: Text("${item.amount}"),
+        ),
         title: Text("${item.name}"),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ItemPage(item: item)),
+          );
+        },
       ),
     );
   }
@@ -136,21 +161,33 @@ class _StartPageState extends State<StartPage> {
     // than having to individually change instances of widgets.
     return new Scaffold(
       key: _scaffoldKey,
-      appBar: new AppBar(
-        title: new Text(_getTitle()),
-        actions: _getActions(),
+      appBar: new GradientAppBar(
+        title: Text(widget.title),
+        centerTitle: true,
+        actions: [
+          new PopupMenuButton(itemBuilder: (context) {
+            return _StartPagePopupMenu.values.map((option) => PopupMenuItem<_StartPagePopupMenu>(
+              value: option,
+              child: ListTile(
+                leading: Icon(_getStartPagePopupMenuIcon(option)),
+                title: Text(_getStartPagePopupMenuName(option)),
+              ),
+            )).toList();
+          },
+            onSelected: (option) => _getStartPagePopupMenuFunction(option)(context),),
+        ],
+        backgroundColorStart: Colors.blue.shade900,
+        backgroundColorEnd: Colors.blue.shade400,
       ),
       body: ListView.builder(
         itemCount: items.length,
         itemBuilder: _buildItem,
       ),
-      floatingActionButton: visible
-          ? new FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
               onPressed: _openAddItemDialog,
               tooltip: 'Add Item',
               child: new Icon(Icons.add),
             )
-          : null,
     );
   }
 }
