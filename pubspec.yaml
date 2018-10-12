@@ -22,6 +22,8 @@ dependencies:
 
   camera: ^0.2.4
   gradient_app_bar: ^0.0.1
+  intl: ^0.15.7
+  rounded_modal: ^0.0.1
 
 dev_dependencies:
   flutter_test:

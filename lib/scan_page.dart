@@ -30,6 +30,18 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _requestCameras();
+  }
+
+  @override
+  void dispose() {
+    controller?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     Widget body;
     if (controller != null) {
@@ -42,14 +54,26 @@ class _ScanPageState extends State<ScanPage> {
                 color: Colors.black.withAlpha(128),
               ),
               child: Padding(
-                padding: EdgeInsets.all(12.0),
-                child: IconButton(
-                  iconSize: 64.0,
-                  icon: Icon(Icons.camera),
-                  onPressed: () {
-                    
-                  },
-                  color: Colors.grey.shade300,
+                padding: EdgeInsets.all(8.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                    IconButton(
+                      iconSize: 32.0,
+                      icon: Icon(Icons.camera_front),
+                      color: Colors.grey.shade300,
+                      onPressed: () {},
+                    ),
+                    IconButton(
+                      iconSize: 48.0,
+                      alignment: Alignment(0.0, 0.0),
+                      icon: Icon(Icons.camera_alt),
+                      onPressed: () {},
+                      color: Colors.grey.shade300,
+                    ),
+                    Container(width: 48.0,),
+                  ],
                 ),
               ),
             ),
@@ -75,20 +99,9 @@ class _ScanPageState extends State<ScanPage> {
       appBar: AppBar(
         title: Text("Scanning"),
         leading: BackButton(),
+        centerTitle: true,
       ),
       body: body,
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _requestCameras();
-  }
-
-  @override
-  void dispose() {
-    controller?.dispose();
-    super.dispose();
   }
 }
