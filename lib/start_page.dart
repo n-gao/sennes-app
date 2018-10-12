@@ -82,7 +82,9 @@ class _StartPageState extends State<StartPage> {
           title: Text(
             widget.title,
             style: TextStyle(
-                fontFamily: 'Chakra_Petch', fontWeight: FontWeight.w700, fontSize: 24.0),
+                fontFamily: 'Chakra_Petch',
+                fontWeight: FontWeight.w700,
+                fontSize: 24.0),
           ),
           centerTitle: true,
           actions: [
@@ -91,9 +93,12 @@ class _StartPageState extends State<StartPage> {
                 return _StartPagePopupMenu.values
                     .map((option) => PopupMenuItem<_StartPagePopupMenu>(
                           value: option,
-                          child: ListTile(
-                            leading: Icon(_getStartPagePopupMenuIcon(option)),
-                            title: Text(_getStartPagePopupMenuName(option)),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(_getStartPagePopupMenuIcon(option)),
+                              Text(_getStartPagePopupMenuName(option)),
+                            ],
                           ),
                         ))
                     .toList();
