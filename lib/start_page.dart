@@ -79,7 +79,11 @@ class _StartPageState extends State<StartPage> {
     return new Scaffold(
         key: _scaffoldKey,
         appBar: new AppBar(
-          title: Text(widget.title),
+          title: Text(
+            widget.title,
+            style: TextStyle(
+                fontFamily: 'Chakra_Petch', fontWeight: FontWeight.w700, fontSize: 24.0),
+          ),
           centerTitle: true,
           actions: [
             new PopupMenuButton(

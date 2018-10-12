@@ -69,5 +69,11 @@ flutter:
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
   #
+  fonts:
+    - family: Chakra_Petch
+      fonts:
+      - asset: fonts/Chakra_Petch/ChakraPetch-Regular.ttf
+      - asset: fonts/Chakra_Petch/ChakraPetch-SemiBold.ttf
+        weight: 700
   # For details regarding fonts from package dependencies,
   # see https://flutter.io/custom-fonts/#from-packages
