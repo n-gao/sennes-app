@@ -43,7 +43,7 @@ class _ItemPageState extends State<ItemPage> {
             padding: EdgeInsets.only(left:16.0, right: 16.0, top: 16.0),
             children: <Widget>[
               Text(
-                "Manufactor information",
+                "Manufacturer information",
                 textAlign: TextAlign.left,
                 style: TextStyle(
                   fontSize: 20.0,

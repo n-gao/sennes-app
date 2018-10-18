@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'item.dart';
 import 'item_page.dart';
 import 'scan_page.dart';
-import 'package:rounded_modal/rounded_modal.dart';
+import 'main.dart';
 
 class StartPage extends StatefulWidget {
   StartPage({Key key, this.title}) : super(key: key);
@@ -86,6 +86,7 @@ class _StartPageState extends State<StartPage> {
                 fontWeight: FontWeight.w700,
                 fontSize: 24.0),
           ),
+          elevation: 0.0,
           centerTitle: true,
           actions: [
             new PopupMenuButton(
@@ -97,6 +98,7 @@ class _StartPageState extends State<StartPage> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(_getStartPagePopupMenuIcon(option)),
+                              Container(width: 8.0),
                               Text(_getStartPagePopupMenuName(option)),
                             ],
                           ),
@@ -108,21 +110,42 @@ class _StartPageState extends State<StartPage> {
             ),
           ],
         ),
-        body: RefreshIndicator(
-          child: ListView.builder(
-            itemCount: items.length,
-            itemBuilder: _buildItem,
-            physics: PageScrollPhysics(),
+        body: Material(
+          type: MaterialType.card,
+          color: Colors.white,
+          shape: BeveledRectangleBorder(
+              borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(32.0),
+            topRight: Radius.circular(32.0),
+          )),
+          elevation: 1.0,
+          clipBehavior: Clip.antiAlias,
+          child: ClipRRect(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(32.0),
+              topRight: Radius.circular(32.0),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: RefreshIndicator(
+              child: ListView.builder(
+                itemCount: items.length,
+                itemBuilder: _buildItem,
+                physics: PageScrollPhysics(),
+              ),
+              key: _refreshIndicatorKey,
+              onRefresh: () {
+                return new Future.delayed(const Duration(seconds: 1), () {});
+              },
+            ),
           ),
-          key: _refreshIndicatorKey,
-          onRefresh: () {
-            return new Future.delayed(const Duration(seconds: 1), () {});
-          },
         ),
+        backgroundColor: SennesApp.primaryColor,
         floatingActionButton: FloatingActionButton(
           onPressed: _openAddItemDialog,
           tooltip: 'Add Item',
           child: new Icon(Icons.add),
+          shape:
+              BeveledRectangleBorder(borderRadius: BorderRadius.circular(32.0)),
         ));
   }
 
@@ -195,9 +218,8 @@ class _StartPageState extends State<StartPage> {
   }
 
   void _openAddItemDialog() {
-    showRoundedModalBottomSheet(
+    showModalBottomSheet(
         context: _scaffoldKey.currentContext,
-        radius: 16.0,
         builder: (builder) {
           return new Form(
               key: _formKey,
@@ -210,7 +232,6 @@ class _StartPageState extends State<StartPage> {
                         IconButton(
                           icon: Icon(Icons.camera_alt),
                           onPressed: () {},
-                          color: Colors.grey.shade600,
                         ),
                         Expanded(
                           child: TextFormField(
@@ -234,13 +255,8 @@ class _StartPageState extends State<StartPage> {
                           ),
                         ),
                         RaisedButton(
-                          shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8.0))),
                           child: Text("Add"),
                           onPressed: _submit,
-                          color: Colors.blueAccent,
-                          textColor: Colors.white,
                         ),
                       ],
                     ),
