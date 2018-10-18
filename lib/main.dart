@@ -5,7 +5,8 @@ void main() => runApp(new SennesApp());
 
 class SennesApp extends StatelessWidget {
   // This widget is the root of your application.
-  static const Color primaryColor = Colors.blue;
+  static const Color primaryColor = Colors.indigo;
+  static const Color accentColor = Colors.pinkAccent;
 
   @override
   Widget build(BuildContext context) {
@@ -22,8 +23,9 @@ class SennesApp extends StatelessWidget {
         // counter didn't reset back to zero; the application is not restarted.
         primarySwatch: primaryColor,
         scaffoldBackgroundColor: Colors.white,
+        buttonColor: accentColor,
+        accentColor: accentColor,
         brightness: Brightness.light,
-        buttonColor: Colors.blueAccent,
         buttonTheme: ButtonThemeData(
           shape:
               BeveledRectangleBorder(borderRadius: BorderRadius.circular(8.0)),

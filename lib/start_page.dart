@@ -79,6 +79,7 @@ class _StartPageState extends State<StartPage> {
     return new Scaffold(
         key: _scaffoldKey,
         appBar: new AppBar(
+          // backgroundColor: Colors.white,
           title: Text(
             widget.title,
             style: TextStyle(
@@ -115,28 +116,21 @@ class _StartPageState extends State<StartPage> {
           color: Colors.white,
           shape: BeveledRectangleBorder(
               borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(32.0),
-            topRight: Radius.circular(32.0),
-          )),
-          elevation: 1.0,
+                  // topLeft: Radius.circular(32.0),
+                  topRight: Radius.circular(32.0),
+                  )),
+          elevation: 8.0,
           clipBehavior: Clip.antiAlias,
-          child: ClipRRect(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(32.0),
-              topRight: Radius.circular(32.0),
+          child: RefreshIndicator(
+            child: ListView.builder(
+              itemCount: items.length,
+              itemBuilder: _buildItem,
+              physics: PageScrollPhysics(),
             ),
-            clipBehavior: Clip.antiAlias,
-            child: RefreshIndicator(
-              child: ListView.builder(
-                itemCount: items.length,
-                itemBuilder: _buildItem,
-                physics: PageScrollPhysics(),
-              ),
-              key: _refreshIndicatorKey,
-              onRefresh: () {
-                return new Future.delayed(const Duration(seconds: 1), () {});
-              },
-            ),
+            key: _refreshIndicatorKey,
+            onRefresh: () {
+              return new Future.delayed(const Duration(seconds: 1), () {});
+            },
           ),
         ),
         backgroundColor: SennesApp.primaryColor,
@@ -193,26 +187,35 @@ class _StartPageState extends State<StartPage> {
         alignment: Alignment(0.9, 0.0),
         child: Icon(Icons.remove, color: Colors.white),
       ),
-      child: Container(
-        child: ListTile(
-          leading: CircleAvatar(
-            backgroundImage: NetworkImage(item.imageUrl),
+      child: Column(
+        children: <Widget>[
+          ListTile(
+            leading: CircleAvatar(
+              radius: 24.0,
+              backgroundImage: NetworkImage(item.imageUrl),
+            ),
+            title: Text(item.name),
+            subtitle: Text("${item.amount}x ${item.size}"),
+            trailing: Text("scanned ${item.dateString}"),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ItemPage(item: item)),
+              );
+            },
           ),
-          title: Text(item.name),
-          subtitle: Text("${item.amount}x ${item.size}"),
-          trailing: Text("scanned ${item.dateString}"),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => ItemPage(item: item)),
-            );
-          },
-        ),
-        decoration: index + 1 < items.length
-            ? BoxDecoration(
-                border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
-              )
-            : null,
+          Padding(
+            padding: EdgeInsets.only(left: 64.0, right: 16.0),
+            child: Container(
+              decoration: index + 1 < items.length
+                  ? BoxDecoration(
+                      border: Border(
+                          bottom: BorderSide(color: Colors.grey.shade300)),
+                    )
+                  : null,
+            ),
+          )
+        ],
       ),
     );
   }
