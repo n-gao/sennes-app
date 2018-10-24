@@ -29,6 +29,7 @@ class _ItemPageState extends State<ItemPage> {
               pinned: true,
               leading: BackButton(),
               flexibleSpace: FlexibleSpaceBar(
+                collapseMode: CollapseMode.parallax,
                 centerTitle: true,
                 title: Text(widget.item.name),
                 background:

@@ -79,7 +79,6 @@ class _StartPageState extends State<StartPage> {
     return new Scaffold(
         key: _scaffoldKey,
         appBar: new AppBar(
-          // backgroundColor: Colors.white,
           title: Text(
             widget.title,
             style: TextStyle(
@@ -87,6 +86,7 @@ class _StartPageState extends State<StartPage> {
                 fontWeight: FontWeight.w700,
                 fontSize: 24.0),
           ),
+          // backgroundColor: Colors.white,
           elevation: 0.0,
           centerTitle: true,
           actions: [
@@ -116,9 +116,9 @@ class _StartPageState extends State<StartPage> {
           color: Colors.white,
           shape: BeveledRectangleBorder(
               borderRadius: BorderRadius.only(
-                  // topLeft: Radius.circular(32.0),
-                  topRight: Radius.circular(32.0),
-                  )),
+            topLeft: Radius.circular(24.0),
+            topRight: Radius.circular(24.0),
+          )),
           elevation: 8.0,
           clipBehavior: Clip.antiAlias,
           child: RefreshIndicator(
@@ -129,7 +129,7 @@ class _StartPageState extends State<StartPage> {
             ),
             key: _refreshIndicatorKey,
             onRefresh: () {
-              return new Future.delayed(const Duration(seconds: 1), () {});
+              return new Future.delayed(const Duration(seconds: 2), () {});
             },
           ),
         ),
@@ -190,9 +190,19 @@ class _StartPageState extends State<StartPage> {
       child: Column(
         children: <Widget>[
           ListTile(
-            leading: CircleAvatar(
-              radius: 24.0,
-              backgroundImage: NetworkImage(item.imageUrl),
+            leading: Material(
+              shape: BeveledRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0)),
+              elevation: 1.0,
+              color: Colors.white,
+              type: MaterialType.card,
+              clipBehavior: Clip.antiAlias,
+              child: Image.network(
+                item.imageUrl,
+                width: 48.0,
+                height: 48.0,
+                fit: BoxFit.cover,
+              ),
             ),
             title: Text(item.name),
             subtitle: Text("${item.amount}x ${item.size}"),

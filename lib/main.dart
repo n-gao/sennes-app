@@ -6,7 +6,7 @@ void main() => runApp(new SennesApp());
 class SennesApp extends StatelessWidget {
   // This widget is the root of your application.
   static const Color primaryColor = Colors.indigo;
-  static const Color accentColor = Colors.pinkAccent;
+  static const Color accentColor = Colors.pink;
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +34,7 @@ class SennesApp extends StatelessWidget {
         iconTheme: IconThemeData(
           color: Colors.grey.shade700,
         ),
+
       ),
       home: new StartPage(title: 'SenneS'),
       // home: new ScanPage(),
