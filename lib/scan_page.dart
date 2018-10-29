@@ -3,7 +3,7 @@ import 'package:camera/camera.dart';
 
 class ScanPage extends StatefulWidget {
   ScanPage({Key key}) : super(key: key);
-
+  
   @override
   _ScanPageState createState() => new _ScanPageState();
 }

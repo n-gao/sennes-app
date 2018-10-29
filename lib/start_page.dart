@@ -3,6 +3,7 @@ import 'item.dart';
 import 'item_page.dart';
 import 'scan_page.dart';
 import 'main.dart';
+import 'server_api.dart';
 
 class StartPage extends StatefulWidget {
   StartPage({Key key, this.title}) : super(key: key);
@@ -146,6 +147,7 @@ class _StartPageState extends State<StartPage> {
   @override
   void initState() {
     super.initState();
+    ServerApi.getInstance();
     items.sort();
   }
 

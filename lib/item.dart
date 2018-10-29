@@ -7,7 +7,7 @@ part 'item.g.dart';
 @JsonSerializable()
 class Item extends Comparable<Item> {
   final String name;
-  final String imageUrl;
+  String imageUrl;
   final String barcode = "1";
   String size;
   String manufacturerNote;
