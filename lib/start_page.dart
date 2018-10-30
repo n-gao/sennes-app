@@ -27,38 +27,38 @@ enum _StartPagePopupMenu { Settings }
 
 class _StartPageState extends State<StartPage> {
   final items = <Item>[
-    Item("Coke",
+    Item(name: "Coke",
         amount: 1,
         size: "2l",
         imageUrl: "https://cdn.huntoffice.ie/images/D/can-of-coke.jpg"),
-    Item("Tomatoes",
+    Item(name: "Tomatoes",
         amount: 12,
         imageUrl:
             "https://images-na.ssl-images-amazon.com/images/I/81avkS31xRL._SY355_.jpg"),
-    Item("Cream Cheese",
+    Item(name: "Cream Cheese",
         amount: 1,
         size: "200ml",
         imageUrl: "https://pics.drugstore.com/prodimg/419651/900.jpg"),
-    Item("Cheddar",
+    Item(name: "Cheddar",
         amount: 2,
         imageUrl:
             "https://www.maggi.de/Lists/Maggi-Images/maggi-kochstudio/wissen/lexikon/MAGGI-lexikon-cheddar.jpg"),
-    Item("Milk",
+    Item(name: "Milk",
         amount: 3,
         size: "1l",
         imageUrl:
             "https://target.scene7.com/is/image/Target/GUEST_ebef1ac1-6e80-484b-aaff-36a1a74b9e82?wid=488&hei=488&fmt=pjpeg"),
-    Item("Yogurt",
+    Item(name: "Yogurt",
         amount: 6,
         size: "6 pack",
         imageUrl:
             "https://www.heb.com.mx/media/catalog/product/cache/20/image/d954a60aa48ef57022b0eb878e93bc1f/Y/o/455179_635013011.png"),
-    Item("Orange Juice",
+    Item(name: "Orange Juice",
         amount: 1,
         size: "1l",
         imageUrl:
             "https://static.meijer.com/Media/000/16300/0001630016565_2_A1C1_0600.png"),
-    Item("Strawberry Marmalade",
+    Item(name: "Strawberry Marmalade",
         amount: 1,
         size: "500g",
         imageUrl: "https://www.abelandcole.co.uk/media/1648_18063_z.jpg"),
@@ -160,7 +160,7 @@ class _StartPageState extends State<StartPage> {
           Item item = items.firstWhere((i) => i.name == toAdd);
           item.amount += 1;
         } catch (Exception) {
-          items.add(Item(toAdd));
+          items.add(Item(name: toAdd));
           items.sort();
         }
       });

@@ -7,8 +7,14 @@ part of 'response.dart';
 // **************************************************************************
 
 Response _$ResponseFromJson(Map<String, dynamic> json) {
-  return Response(json['error'], json['error_msg'], json['new_state'],
-      json['updates'], json['info']);
+  return Response(
+      error: json['error'] as int,
+      errorMessage: json['error_msg'] as String,
+      newState: json['new_state'] as int,
+      updates: (json['updates'] as List)?.map((e) => e as String)?.toList(),
+      barcodeInfo: (json['info'] as List)
+          ?.map((e) => e as Map<String, dynamic>)
+          ?.toList());
 }
 
 Map<String, dynamic> _$ResponseToJson(Response instance) => <String, dynamic>{

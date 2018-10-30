@@ -14,7 +14,7 @@ class Response {
   @JsonKey(name: 'info')
   List<Map<String, dynamic>> barcodeInfo;
 
-  Response(error, errorMessage, newState, updates, barcodeInfo);
+  Response({this.error, this.errorMessage, this.newState, this.updates, this.barcodeInfo});
 
   factory Response.fromJson(Map<String, dynamic> json) => _$ResponseFromJson(json);
 

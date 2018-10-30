@@ -11,21 +11,22 @@ class Request {
   List<String> barcodes;
   String update;
 
-  Request(fridgeId, method, state, barcodes, update);
+  Request({this.fridgeId, this.method, this.state, this.barcodes, this.update});
 
-  factory Request.getUpdates(fridgeId, state){
-    return Request(fridgeId, "get_updates", state, null, null);
+  factory Request.getUpdates(fridgeId, state) {
+    return Request(fridgeId: fridgeId, method: "get_updates", state: state);
   }
 
-  factory Request.addUpdate(fridgeId, update){
-    return Request(fridgeId, "add_update", null, null, update);
+  factory Request.addUpdate(fridgeId, update) {
+    return Request(fridgeId: fridgeId, method: "add_update", update: update);
   }
 
-  factory Request.barcodeInfo(barcodes){
-    return Request(null, "barcode_info", null, barcodes, null);
+  factory Request.barcodeInfo(barcodes) {
+    return Request(method: "barcode_info", barcodes: barcodes);
   }
 
-  factory Request.fromJson(Map<String, dynamic> json) => _$RequestFromJson(json);
+  factory Request.fromJson(Map<String, dynamic> json) =>
+      _$RequestFromJson(json);
 
   Map<String, dynamic> toJson() => _$RequestToJson(this);
 }

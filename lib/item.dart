@@ -6,41 +6,37 @@ part 'item.g.dart';
 // Call "flutter packages pub run build_runner build" in command line after chaning this class
 @JsonSerializable()
 class Item extends Comparable<Item> {
-  final String name;
+  final String barcode;
+  String name;
   String imageUrl;
-  final String barcode = "1";
   String size;
   String manufacturerNote;
   Map<String, String> attributes;
-  DateTime addedDate;
   int amount;
+  List<DateTime> changed;
 
-  Item(this.name,
-      {this.amount: 1,
-      this.size: "",
-      this.imageUrl:
-          "https://www.maggi.de/Lists/Maggi-Images/maggi-kochstudio/wissen/lexikon/MAGGI-lexikon-cheddar.jpg",
-      this.addedDate,
-      this.manufacturerNote,
-      this.attributes}) {
-    if (this.addedDate == null) {
-      this.addedDate = DateTime.now();
-    }
-  }
+  Item({
+    this.barcode,
+    this.name,
+    this.amount=0,
+    this.size,
+    this.imageUrl,
+    this.manufacturerNote,
+    this.attributes,
+    this.changed
+  });
 
-  factory Item.from(Item item) {
-    return Item(item.name,
-        amount: item.amount,
-        size: item.size,
-        imageUrl: item.imageUrl,
-        addedDate: item.addedDate,
-        attributes: item.attributes,
-        manufacturerNote: item.manufacturerNote);
+  void updateData(Map<String, dynamic> json) {
+
   }
 
   @override
   int compareTo(Item other) {
     return this.name.toLowerCase().compareTo(other.name.toLowerCase());
+  }
+
+  get addedDate {
+    return changed.last;
   }
 
   String get dateString {

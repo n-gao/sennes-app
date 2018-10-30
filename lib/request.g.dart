@@ -7,8 +7,12 @@ part of 'request.dart';
 // **************************************************************************
 
 Request _$RequestFromJson(Map<String, dynamic> json) {
-  return Request(json['fridge_id'], json['method'], json['state'],
-      json['barcodes'], json['update']);
+  return Request(
+      fridgeId: json['fridge_id'] as int,
+      method: json['method'] as String,
+      state: json['state'] as int,
+      barcodes: (json['barcodes'] as List)?.map((e) => e as String)?.toList(),
+      update: json['update'] as String);
 }
 
 Map<String, dynamic> _$RequestToJson(Request instance) => <String, dynamic>{
