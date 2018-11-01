@@ -186,7 +186,6 @@ class _StartPageState extends State<StartPage> {
   }
 
   Widget _buildItem(context, index) {
-    print(controller == null);
     return ItemWidget(index: controller != null ? index : null);
   }
 

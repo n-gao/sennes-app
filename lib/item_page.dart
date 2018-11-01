@@ -53,8 +53,7 @@ class _ItemPageState extends State<ItemPage> {
               Container(
                 height: 8.0,
               ),
-              Text(
-                "We select the highest quality Irish cheddar across our Ardagh range which is made with Irish milk and is produced and packed in Ireland.",
+              Text(widget.item.manufacturerNote,
                 textAlign: TextAlign.justify,
               ),
               Container(
