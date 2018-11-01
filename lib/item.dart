@@ -1,19 +1,24 @@
 import 'package:intl/intl.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'dart:math';
 
 part 'item.g.dart';
 
 // Call "flutter packages pub run build_runner build" in command line after chaning this class
 @JsonSerializable()
 class Item extends Comparable<Item> {
-  final String barcode;
+  String barcode;
   String name;
   String imageUrl;
   String size;
   String manufacturerNote;
-  Map<String, String> attributes;
+  String website;
+  String nutrition;
+  String brand;
   int amount;
   List<DateTime> changed;
+  String ingredients;
+  bool dataComplete;
 
   Item({
     this.barcode,
@@ -22,12 +27,30 @@ class Item extends Comparable<Item> {
     this.size,
     this.imageUrl,
     this.manufacturerNote,
-    this.attributes,
-    this.changed
-  });
+    this.changed,
+    this.website,
+    this.ingredients,
+    this.brand,
+    this.nutrition,
+    this.dataComplete=false
+  }) {
+    this.barcode = Random().nextInt(9000000).toString();
+  }
 
-  void updateData(Map<String, dynamic> json) {
+  readUpdate(Map<String, dynamic> update, key, missing) {
+    return update.containsKey(key) ? update[key] : missing;
+  }
 
+  void updateInfo(Map<String, dynamic> update) {
+    this.name = readUpdate(update, 'description', '<missing>');
+    this.imageUrl = readUpdate(update, 'imageUrl', '');
+    this.size = readUpdate(update, 'uom', '');
+    this.manufacturerNote = readUpdate(update, 'usage', 'No information provided');
+    this.ingredients = readUpdate(update, 'ingredients', '');
+    this.website = readUpdate(update, 'product_web_page', '');
+    this.nutrition = readUpdate(update, 'nutrition', '');
+    this.brand = readUpdate(update, 'brand', '');
+    this.dataComplete = true;
   }
 
   @override
@@ -35,8 +58,12 @@ class Item extends Comparable<Item> {
     return this.name.toLowerCase().compareTo(other.name.toLowerCase());
   }
 
+  get displayName {
+    return name ?? barcode;
+  }
+
   get addedDate {
-    return changed.last;
+    return DateTime.now();
   }
 
   String get dateString {

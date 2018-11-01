@@ -9,11 +9,14 @@ import 'response.dart';
 import 'configuration.dart';
 import 'item_update.dart';
 
+typedef void InventoryChanged();
+
 class ItemController {
   final cryptor = PlatformStringCryptor();
   final Configuration config;
   Map<String, Item> _inventoryMap;
   List<Item> _inventory;
+  InventoryChanged _changedCallback;
   int _state;
 
   static ItemController _instance;
@@ -29,10 +32,17 @@ class ItemController {
 
   Future readFromStorage() async {
     var localFile = await _inventoryFile;
-    var content = await localFile.readAsString();
-    var stored = json.decode(content);
-    _inventory = stored['inventory'] as List<Item>;
-    _state = stored['state'] as int;
+    _inventoryMap = Map();
+    try {
+      var content = await localFile.readAsString();
+      var stored = json.decode(content);
+      _inventory = stored['inventory'] as List<Item>;
+      _inventory.forEach((item) => _inventoryMap[item.barcode] = item);
+      _state = stored['state'] as int;
+    } catch(error){
+      _inventory = [];
+      _state = 0;
+    }
   }
 
   Future saveToStorage() async {
@@ -54,15 +64,17 @@ class ItemController {
     }
     _state = response.newState;
     saveToStorage();
+    _changedCallback?.call();
   }
 
   Future requestItemInfos(List<Item> items) async {
     Request request = Request.barcodeInfo(items.map((item) => item.barcode));
     Response response = await ServerApi.getInstance().fetchRequest(request);
     for (var i=0; i<items.length; i++) {
-      items[i].updateData(response.barcodeInfo[i]);
+      items[i].updateInfo(response.barcodeInfo[i]);
     }
     saveToStorage();
+    _changedCallback?.call();
   }
 
   void applyUpdate(ItemUpdate update) {
@@ -73,6 +85,11 @@ class ItemController {
     } else {
       add(Item(barcode: update.barcode, changed: [time]));
     }
+    _changedCallback?.call();
+  }
+
+  void setChangedCallback(InventoryChanged callback) {
+    this._changedCallback = callback;
   }
 
   void add(Item item) {
@@ -80,11 +97,22 @@ class ItemController {
       _inventoryMap[item.barcode] = item;
       _inventory.add(item);
       _inventory.sort();
+      _changedCallback?.call();
     }
   }
 
-  Item operator [](int index) {
-    return _inventory[index];
+  Future<Item> operator [](dynamic index) async {
+    if (index is int) {
+      return _inventory[index];
+    }
+    if (index is String) {
+      return _inventoryMap[index];
+    }
+    throw TypeError();
+  }
+
+  int get length {
+    return _inventory.length;
   }
 
   Future<String> get _appDocDir async {

@@ -14,11 +14,13 @@ Item _$ItemFromJson(Map<String, dynamic> json) {
       size: json['size'] as String,
       imageUrl: json['imageUrl'] as String,
       manufacturerNote: json['manufacturerNote'] as String,
-      attributes: (json['attributes'] as Map<String, dynamic>)
-          ?.map((k, e) => MapEntry(k, e as String)),
       changed: (json['changed'] as List)
           ?.map((e) => e == null ? null : DateTime.parse(e as String))
-          ?.toList());
+          ?.toList(),
+      website: json['website'] as String,
+      dataComplete: json['dataComplete'] as bool)
+    ..nutrition = json['nutrition'] as String
+    ..ingredients = json['ingredients'] as String;
 }
 
 Map<String, dynamic> _$ItemToJson(Item instance) => <String, dynamic>{
@@ -27,7 +29,10 @@ Map<String, dynamic> _$ItemToJson(Item instance) => <String, dynamic>{
       'imageUrl': instance.imageUrl,
       'size': instance.size,
       'manufacturerNote': instance.manufacturerNote,
-      'attributes': instance.attributes,
+      'website': instance.website,
+      'nutrition': instance.nutrition,
       'amount': instance.amount,
-      'changed': instance.changed?.map((e) => e?.toIso8601String())?.toList()
+      'changed': instance.changed?.map((e) => e?.toIso8601String())?.toList(),
+      'ingredients': instance.ingredients,
+      'dataComplete': instance.dataComplete
     };

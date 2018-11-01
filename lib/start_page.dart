@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'item.dart';
-import 'item_page.dart';
+import 'item_controller.dart';
 import 'scan_page.dart';
 import 'main.dart';
 import 'server_api.dart';
+import 'item_widget.dart';
 
 class StartPage extends StatefulWidget {
   StartPage({Key key, this.title}) : super(key: key);
@@ -27,38 +28,46 @@ enum _StartPagePopupMenu { Settings }
 
 class _StartPageState extends State<StartPage> {
   final items = <Item>[
-    Item(name: "Coke",
+    Item(
+        name: "Coke",
         amount: 1,
         size: "2l",
         imageUrl: "https://cdn.huntoffice.ie/images/D/can-of-coke.jpg"),
-    Item(name: "Tomatoes",
+    Item(
+        name: "Tomatoes",
         amount: 12,
         imageUrl:
             "https://images-na.ssl-images-amazon.com/images/I/81avkS31xRL._SY355_.jpg"),
-    Item(name: "Cream Cheese",
+    Item(
+        name: "Cream Cheese",
         amount: 1,
         size: "200ml",
         imageUrl: "https://pics.drugstore.com/prodimg/419651/900.jpg"),
-    Item(name: "Cheddar",
+    Item(
+        name: "Cheddar",
         amount: 2,
         imageUrl:
             "https://www.maggi.de/Lists/Maggi-Images/maggi-kochstudio/wissen/lexikon/MAGGI-lexikon-cheddar.jpg"),
-    Item(name: "Milk",
+    Item(
+        name: "Milk",
         amount: 3,
         size: "1l",
         imageUrl:
             "https://target.scene7.com/is/image/Target/GUEST_ebef1ac1-6e80-484b-aaff-36a1a74b9e82?wid=488&hei=488&fmt=pjpeg"),
-    Item(name: "Yogurt",
+    Item(
+        name: "Yogurt",
         amount: 6,
         size: "6 pack",
         imageUrl:
             "https://www.heb.com.mx/media/catalog/product/cache/20/image/d954a60aa48ef57022b0eb878e93bc1f/Y/o/455179_635013011.png"),
-    Item(name: "Orange Juice",
+    Item(
+        name: "Orange Juice",
         amount: 1,
         size: "1l",
         imageUrl:
             "https://static.meijer.com/Media/000/16300/0001630016565_2_A1C1_0600.png"),
-    Item(name: "Strawberry Marmalade",
+    Item(
+        name: "Strawberry Marmalade",
         amount: 1,
         size: "500g",
         imageUrl: "https://www.abelandcole.co.uk/media/1648_18063_z.jpg"),
@@ -67,16 +76,11 @@ class _StartPageState extends State<StartPage> {
   final _formKey = GlobalKey<FormState>();
   final _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
   PersistentBottomSheetController addDialog;
+  ItemController controller;
   String toAdd = "";
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return new Scaffold(
         key: _scaffoldKey,
         appBar: new AppBar(
@@ -124,7 +128,7 @@ class _StartPageState extends State<StartPage> {
           clipBehavior: Clip.antiAlias,
           child: RefreshIndicator(
             child: ListView.builder(
-              itemCount: items.length,
+              itemCount: controller != null ? controller.length : 15,
               itemBuilder: _buildItem,
               physics: PageScrollPhysics(),
             ),
@@ -148,6 +152,20 @@ class _StartPageState extends State<StartPage> {
   void initState() {
     super.initState();
     ServerApi.getInstance();
+    if (this.controller == null) {
+      ItemController.getInstance().then((controller) {
+        setState(() {
+          this.controller = controller;
+          for (var item in items) {
+            controller.add(item);
+          }
+          print(controller.length);
+        });
+      }).catchError((error){
+        print("error when trying to get controller");
+        print(error);
+      });
+    }
     items.sort();
   }
 
@@ -167,69 +185,9 @@ class _StartPageState extends State<StartPage> {
     }
   }
 
-  Dismissible _buildItem(context, index) {
-    final item = items[index];
-    return Dismissible(
-      key: ObjectKey(item),
-      onDismissed: (direction) {
-        setState(() {
-          items.removeAt(index);
-        });
-        Scaffold.of(context).showSnackBar(SnackBar(
-          content: Text("${item.name} has been dismised."),
-        ));
-      },
-      background: Container(
-        color: Colors.green,
-        alignment: Alignment(-0.9, 0.0),
-        child: Icon(Icons.add, color: Colors.white),
-      ),
-      secondaryBackground: Container(
-        color: Colors.red,
-        alignment: Alignment(0.9, 0.0),
-        child: Icon(Icons.remove, color: Colors.white),
-      ),
-      child: Column(
-        children: <Widget>[
-          ListTile(
-            leading: Material(
-              shape: BeveledRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.0)),
-              elevation: 1.0,
-              color: Colors.white,
-              type: MaterialType.card,
-              clipBehavior: Clip.antiAlias,
-              child: Image.network(
-                item.imageUrl,
-                width: 48.0,
-                height: 48.0,
-                fit: BoxFit.cover,
-              ),
-            ),
-            title: Text(item.name),
-            subtitle: Text("${item.amount}x ${item.size}"),
-            trailing: Text("scanned ${item.dateString}"),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ItemPage(item: item)),
-              );
-            },
-          ),
-          Padding(
-            padding: EdgeInsets.only(left: 64.0, right: 16.0),
-            child: Container(
-              decoration: index + 1 < items.length
-                  ? BoxDecoration(
-                      border: Border(
-                          bottom: BorderSide(color: Colors.grey.shade300)),
-                    )
-                  : null,
-            ),
-          )
-        ],
-      ),
-    );
+  Widget _buildItem(context, index) {
+    print(controller == null);
+    return ItemWidget(index: controller != null ? index : null);
   }
 
   void _openAddItemDialog() {
