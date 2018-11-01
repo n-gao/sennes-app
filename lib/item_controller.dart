@@ -18,6 +18,15 @@ class ItemController {
   List<Item> _inventory;
   InventoryChanged _changedCallback;
   int _state;
+  Set<ItemUpdate> _unconfirmedUpdates = Set();
+
+  List<Item> get inventory {
+    return _inventory.where((item) => item.amount > 0).toList(growable: false);
+  }
+
+  bool get confirmed {
+    return _unconfirmedUpdates.length == 0;
+  }
 
   static ItemController _instance;
   static Future<ItemController> getInstance() async {
@@ -43,9 +52,11 @@ class ItemController {
       _inventory = [];
       _state = 0;
     }
+    _unconfirmedUpdates = Set();
   }
 
   Future saveToStorage() async {
+    if (!confirmed) throw Error();
     var localFile = await _inventoryFile;
     await localFile.writeAsString(json.encode({
       'inventory' : _inventory,
@@ -60,7 +71,7 @@ class ItemController {
     for (var update in response.updates) {
       var updateJson = json.decode(await cryptor.decrypt(update, key));
       var itemUpdate = ItemUpdate.fromJson(updateJson);
-      applyUpdate(itemUpdate);
+      _applyUpdate(itemUpdate);
     }
     _state = response.newState;
     saveToStorage();
@@ -77,13 +88,29 @@ class ItemController {
     _changedCallback?.call();
   }
 
+  Future uploadUpdate(ItemUpdate update) async {
+    var key = await config.getEncryptionKey();
+    var blob = await cryptor.encrypt(json.encode(update), key);
+    var fridgeId = await config.getFridgeId();
+    await ServerApi.getInstance().fetchRequest(Request.addUpdate(fridgeId, blob));
+    _unconfirmedUpdates.remove(update);
+  }
+
   void applyUpdate(ItemUpdate update) {
+    _unconfirmedUpdates.add(update);
+    _applyUpdate(update);
+    uploadUpdate(update);
+  }
+
+  void _applyUpdate(ItemUpdate update) {
     DateTime time = DateTime.fromMillisecondsSinceEpoch(update.timestamp);
-    if (_inventoryMap.containsKey(update.barcode)) {
-      _inventoryMap[update.barcode].amount += update.method == 0 ? 1 : -1;
-      _inventoryMap[update.barcode].changed.add(time);
+    print(update.name);
+    print(_inventoryMap.keys);
+    if (_inventoryMap.containsKey(update.identifier)) {
+      _inventoryMap[update.identifier].amount += update.method == 0 ? 1 : -1;
+      _inventoryMap[update.identifier].changed.add(time);
     } else {
-      add(Item(barcode: update.barcode, changed: [time]));
+      add(Item(barcode: update.barcode, name: update.name, changed: [time]));
     }
     _changedCallback?.call();
   }
@@ -91,10 +118,40 @@ class ItemController {
   void setChangedCallback(InventoryChanged callback) {
     this._changedCallback = callback;
   }
+  
+  void increase({String barcode, String name, int index}) {
+    if (barcode == null && name == null && index != null) {
+      barcode = _inventory[index].barcode;
+      name = _inventory[index].name;
+    }
+    var update = ItemUpdate(
+      name: name,
+      barcode: barcode,
+      method: 0,
+      methodName: "increase",
+      timestamp: DateTime.now().millisecondsSinceEpoch
+    );
+    applyUpdate(update);
+  }
+  
+  void decrease({String barcode, String name, int index}) {
+    if (barcode == null && name == null && index != null) {
+      barcode = inventory[index].barcode;
+      name = inventory[index].name;
+    }
+    var update = ItemUpdate(
+      name: name,
+      barcode: barcode,
+      method: 1,
+      methodName: "decrease",
+      timestamp: DateTime.now().millisecondsSinceEpoch
+    );
+    applyUpdate(update);
+  }
 
   void add(Item item) {
-    if (!_inventoryMap.containsKey(item.barcode)) {
-      _inventoryMap[item.barcode] = item;
+    if (!_inventoryMap.containsKey(item.identifier)) {
+      _inventoryMap[item.identifier] = item;
       _inventory.add(item);
       _inventory.sort();
       _changedCallback?.call();
@@ -103,7 +160,7 @@ class ItemController {
 
   Future<Item> operator [](dynamic index) async {
     if (index is int) {
-      return _inventory[index];
+      return inventory[index];
     }
     if (index is String) {
       return _inventoryMap[index];
@@ -112,7 +169,7 @@ class ItemController {
   }
 
   int get length {
-    return _inventory.length;
+    return inventory.length;
   }
 
   Future<String> get _appDocDir async {

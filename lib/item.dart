@@ -22,19 +22,19 @@ class Item extends Comparable<Item> {
 
   Item({
     this.barcode,
-    this.name,
-    this.amount=0,
-    this.size,
-    this.imageUrl,
-    this.manufacturerNote,
+    this.name='',
+    this.amount=1,
+    this.size='',
+    this.imageUrl='',
+    this.manufacturerNote='',
     this.changed,
-    this.website,
-    this.ingredients,
-    this.brand,
-    this.nutrition,
+    this.website='',
+    this.ingredients='',
+    this.brand='',
+    this.nutrition='',
     this.dataComplete=false
   }) {
-    this.barcode = Random().nextInt(9000000).toString();
+    changed = changed ?? [DateTime.now()];
   }
 
   readUpdate(Map<String, dynamic> update, key, missing) {
@@ -56,6 +56,10 @@ class Item extends Comparable<Item> {
   @override
   int compareTo(Item other) {
     return this.name.toLowerCase().compareTo(other.name.toLowerCase());
+  }
+
+  get identifier {
+    return barcode ?? name.toLowerCase();
   }
 
   get displayName {

@@ -3,7 +3,6 @@ import 'item.dart';
 import 'item_controller.dart';
 import 'scan_page.dart';
 import 'main.dart';
-import 'server_api.dart';
 import 'item_widget.dart';
 
 class StartPage extends StatefulWidget {
@@ -151,17 +150,18 @@ class _StartPageState extends State<StartPage> {
   @override
   void initState() {
     super.initState();
-    ServerApi.getInstance();
     if (this.controller == null) {
       ItemController.getInstance().then((controller) {
         setState(() {
           this.controller = controller;
+          controller.setChangedCallback(() {
+            // setState(() {});
+          });
           for (var item in items) {
             controller.add(item);
           }
-          print(controller.length);
         });
-      }).catchError((error){
+      }).catchError((error) {
         print("error when trying to get controller");
         print(error);
       });
@@ -174,19 +174,22 @@ class _StartPageState extends State<StartPage> {
       Navigator.pop(context);
       _formKey.currentState.save();
       setState(() {
-        try {
-          Item item = items.firstWhere((i) => i.name == toAdd);
-          item.amount += 1;
-        } catch (Exception) {
-          items.add(Item(name: toAdd));
-          items.sort();
-        }
+        controller?.increase(name: toAdd);
       });
     }
   }
 
   Widget _buildItem(context, index) {
-    return ItemWidget(index: controller != null ? index : null);
+    print(controller.inventory);
+    return ItemWidget(
+      index: controller != null ? index : null,
+      leftSwipeAction: () {
+        controller.increase(index: index);
+      },
+      rightSwipeAction: () {
+        controller.decrease(index: index);
+      },
+    );
   }
 
   void _openAddItemDialog() {

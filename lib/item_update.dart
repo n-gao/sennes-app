@@ -8,11 +8,16 @@ class ItemUpdate {
   @JsonKey(name: 'method_name')
   String methodName;
   String barcode;
+  String name;
   int timestamp;
 
-  ItemUpdate({this.method, this.methodName, this.barcode, this.timestamp});
+  ItemUpdate({this.method, this.methodName, this.barcode, this.timestamp, this.name});
 
   factory ItemUpdate.fromJson(Map<String, dynamic> json) => _$ItemUpdateFromJson(json);
 
   Map<String, dynamic> toJson() => _$ItemUpdateToJson(this);
+
+  get identifier {
+    return barcode ?? name.toLowerCase();
+  }
 }

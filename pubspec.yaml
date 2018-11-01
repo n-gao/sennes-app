@@ -30,6 +30,7 @@ dependencies:
   flutter_string_encryption: ^0.2.0
   shared_preferences: ^0.4.3
   shimmer: ^0.0.5
+  swipeable: ^1.0.0+1
 
 dev_dependencies:
   build_runner: ^1.0.0

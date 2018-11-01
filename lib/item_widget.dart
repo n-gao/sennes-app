@@ -3,16 +3,16 @@ import 'item.dart';
 import 'item_page.dart';
 import 'item_controller.dart';
 import 'package:shimmer/shimmer.dart';
-
-typedef void DismissedAction(DismissDirection direction);
+import 'swipeable.dart';
 
 class ItemWidget extends StatefulWidget {
-  ItemWidget({Key key, this.index, this.item, this.dismissedAction})
+  ItemWidget({Key key, this.index, this.item, this.leftSwipeAction, this.rightSwipeAction})
       : super(key: key);
 
   final Item item;
   final dynamic index;
-  final DismissedAction dismissedAction;
+  final VoidCallback leftSwipeAction;
+  final VoidCallback rightSwipeAction;
 
   @override
   State<StatefulWidget> createState() {
@@ -28,9 +28,8 @@ class _ItemWidgetState extends State<ItemWidget> {
     return item != null;
   }
 
-  @override
-  void didUpdateWidget(oldWidget) {
-    super.didUpdateWidget(oldWidget);
+  void requestItem() {
+    this.item = null;
     if (widget.item != null) {
       this.item = widget.item;
     } else {
@@ -42,6 +41,7 @@ class _ItemWidgetState extends State<ItemWidget> {
               this.item = result;
             });
           }).catchError((error) {
+            print("error when getting item");
             print(error);
           });
         });
@@ -50,11 +50,22 @@ class _ItemWidgetState extends State<ItemWidget> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    requestItem();
+  }
+
+  @override
+  void didUpdateWidget(oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    requestItem();
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (loaded) {
-      return Dismissible(
-        key: ObjectKey(widget.index),
-        onDismissed: (widget.dismissedAction),
+      return Swipeable(
+        // onDismissed: (widget.dismissedAction),
         background: Container(
           color: Colors.green,
           alignment: Alignment(-0.9, 0.0),
@@ -65,6 +76,21 @@ class _ItemWidgetState extends State<ItemWidget> {
           alignment: Alignment(0.9, 0.0),
           child: Icon(Icons.remove, color: Colors.white),
         ),
+        onSwipeRight: () {
+          print("right " + widget.index.toString());
+          if (widget.rightSwipeAction != null) {
+            widget.rightSwipeAction.call();
+            setState(() {});
+          }
+        },
+        onSwipeLeft: () {
+          print("left " + widget.index.toString());
+          if (widget.leftSwipeAction != null) {
+            widget.leftSwipeAction.call();
+            setState(() {});
+          }
+        },
+        threshold: 128.0,
         child: Column(
           children: <Widget>[
             ListTile(

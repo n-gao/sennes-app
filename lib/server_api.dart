@@ -17,6 +17,7 @@ class ServerApi {
   }
 
   Future<Response> fetchRequest(Request request) async {
+    return null;
     var url = 'http:localhost:3000/api?request=';
     var reqString = json.encode(request.toJson());
     final response = await http.get(url + reqString);
