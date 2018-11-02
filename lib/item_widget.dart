@@ -7,7 +7,7 @@ import 'swipeable.dart';
 
 class ItemWidget extends StatefulWidget {
   ItemWidget({Key key, this.index, this.item, this.animation})
-      : super(key: key);
+      : super(key: key ?? ObjectKey(item) ?? ValueKey(index));
 
   final Item item;
   final dynamic index;
@@ -33,11 +33,13 @@ class _ItemWidgetState extends State<ItemWidget> {
   }
 
   void requestItem() async {
-    controller = controller ?? await ItemController.getInstance();
-    var item = await controller[widget.index];
-    setState(() {
-      this._item = item;
-    });
+    if (widget.index != null) {
+      controller = controller ?? await ItemController.getInstance();
+      var item = await controller[widget.index];
+      setState(() {
+        this._item = item;
+      });
+    }
   }
 
   @override
@@ -90,7 +92,6 @@ class _ItemWidgetState extends State<ItemWidget> {
     print(loaded);
     if (loaded) {
       var swipeable = Swipeable(
-          key: ObjectKey(item),
           background: Container(
             color: Colors.green,
             alignment: Alignment(-0.9, 0.0),
