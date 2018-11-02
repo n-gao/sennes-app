@@ -73,9 +73,11 @@ class _StartPageState extends State<StartPage> {
   ];
   final _scaffoldKey = new GlobalKey<ScaffoldState>();
   final _formKey = GlobalKey<FormState>();
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
   final _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
   PersistentBottomSheetController addDialog;
   ItemController controller;
+  ItemListModel listModel;
   String toAdd = "";
 
   @override
@@ -126,11 +128,17 @@ class _StartPageState extends State<StartPage> {
           elevation: 8.0,
           clipBehavior: Clip.antiAlias,
           child: RefreshIndicator(
-            child: ListView.builder(
-              itemCount: controller != null ? controller.length : 15,
-              itemBuilder: _buildItem,
-              physics: PageScrollPhysics(),
-            ),
+            child: listModel != null
+                ? AnimatedList(
+                    itemBuilder: _buildAnimatedItem,
+                    key: _listKey,
+                    initialItemCount: listModel.length,
+                  )
+                : ListView.separated(
+                    itemCount: controller != null ? controller.length : 15,
+                    itemBuilder: _buildItem,
+                    physics: PageScrollPhysics(),
+                    separatorBuilder: _buildSeperator),
             key: _refreshIndicatorKey,
             onRefresh: () {
               return new Future.delayed(const Duration(seconds: 2), () {});
@@ -147,26 +155,29 @@ class _StartPageState extends State<StartPage> {
         ));
   }
 
+  Widget _buildRemovedItem(
+      Item item, BuildContext context, Animation<double> animation) {
+    return ItemWidget(item: item, animation: animation);
+  }
+
+  Future loadModel() async {
+    if (this.listModel != null) return;
+    this.controller = controller ?? await ItemController.getInstance();
+    setState(() {
+      this.listModel = ItemListModel(controller, _listKey, _buildRemovedItem);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-    if (this.controller == null) {
-      ItemController.getInstance().then((controller) {
-        setState(() {
-          this.controller = controller;
-          controller.setChangedCallback(() {
-            // setState(() {});
-          });
-          for (var item in items) {
-            controller.add(item);
-          }
-        });
-      }).catchError((error) {
-        print("error when trying to get controller");
-        print(error);
+    loadModel().then((result) {
+      setState(() {
+        for (var item in items) {
+          controller.add(item);
+        }
       });
-    }
-    items.sort();
+    });
   }
 
   void _submit() {
@@ -179,17 +190,26 @@ class _StartPageState extends State<StartPage> {
     }
   }
 
-  Widget _buildItem(context, index) {
-    print(controller.inventory);
+  Widget _buildSeperator(context, index) {
+    return Padding(
+      padding: EdgeInsets.only(left: 64.0, right: 16.0),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: Colors.grey.shade100)),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAnimatedItem(context, index, animation) {
     return ItemWidget(
       index: controller != null ? index : null,
-      leftSwipeAction: () {
-        controller.increase(index: index);
-      },
-      rightSwipeAction: () {
-        controller.decrease(index: index);
-      },
+      animation: animation,
     );
+  }
+
+  Widget _buildItem(context, index) {
+    return _buildAnimatedItem(context, index, null);
   }
 
   void _openAddItemDialog() {

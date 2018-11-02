@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
@@ -48,7 +49,7 @@ class ItemController {
       _inventory = stored['inventory'] as List<Item>;
       _inventory.forEach((item) => _inventoryMap[item.barcode] = item);
       _state = stored['state'] as int;
-    } catch(error){
+    } catch (error) {
       _inventory = [];
       _state = 0;
     }
@@ -58,10 +59,8 @@ class ItemController {
   Future saveToStorage() async {
     if (!confirmed) throw Error();
     var localFile = await _inventoryFile;
-    await localFile.writeAsString(json.encode({
-      'inventory' : _inventory,
-      'state' : _state
-    }));
+    await localFile
+        .writeAsString(json.encode({'inventory': _inventory, 'state': _state}));
   }
 
   Future requstItemUpdates() async {
@@ -81,7 +80,7 @@ class ItemController {
   Future requestItemInfos(List<Item> items) async {
     Request request = Request.barcodeInfo(items.map((item) => item.barcode));
     Response response = await ServerApi.getInstance().fetchRequest(request);
-    for (var i=0; i<items.length; i++) {
+    for (var i = 0; i < items.length; i++) {
       items[i].updateInfo(response.barcodeInfo[i]);
     }
     saveToStorage();
@@ -92,7 +91,8 @@ class ItemController {
     var key = await config.getEncryptionKey();
     var blob = await cryptor.encrypt(json.encode(update), key);
     var fridgeId = await config.getFridgeId();
-    await ServerApi.getInstance().fetchRequest(Request.addUpdate(fridgeId, blob));
+    await ServerApi.getInstance()
+        .fetchRequest(Request.addUpdate(fridgeId, blob));
     _unconfirmedUpdates.remove(update);
   }
 
@@ -118,34 +118,32 @@ class ItemController {
   void setChangedCallback(InventoryChanged callback) {
     this._changedCallback = callback;
   }
-  
+
   void increase({String barcode, String name, int index}) {
     if (barcode == null && name == null && index != null) {
-      barcode = _inventory[index].barcode;
-      name = _inventory[index].name;
+      barcode = inventory[index].barcode;
+      name = inventory[index].name;
     }
     var update = ItemUpdate(
-      name: name,
-      barcode: barcode,
-      method: 0,
-      methodName: "increase",
-      timestamp: DateTime.now().millisecondsSinceEpoch
-    );
+        name: name,
+        barcode: barcode,
+        method: 0,
+        methodName: "increase",
+        timestamp: DateTime.now().millisecondsSinceEpoch);
     applyUpdate(update);
   }
-  
+
   void decrease({String barcode, String name, int index}) {
     if (barcode == null && name == null && index != null) {
       barcode = inventory[index].barcode;
       name = inventory[index].name;
     }
     var update = ItemUpdate(
-      name: name,
-      barcode: barcode,
-      method: 1,
-      methodName: "decrease",
-      timestamp: DateTime.now().millisecondsSinceEpoch
-    );
+        name: name,
+        barcode: barcode,
+        method: 1,
+        methodName: "decrease",
+        timestamp: DateTime.now().millisecondsSinceEpoch);
     applyUpdate(update);
   }
 
@@ -182,4 +180,43 @@ class ItemController {
     final path = await _appDocDir;
     return File('$path/inventory.json');
   }
+}
+
+class ItemListModel {
+  final ItemController controller;
+  final GlobalKey<AnimatedListState> listKey;
+  final dynamic removedItemBuilder;
+  List<Item> inventoryCopy;
+
+  ItemListModel(this.controller, this.listKey, this.removedItemBuilder) {
+    inventoryCopy = List<Item>.from(controller.inventory);
+    controller.setChangedCallback(_updateAnimatedList);
+  }
+
+  void _updateAnimatedList() {
+    var newCpy = List<Item>.from(controller.inventory);
+    var added = List<Item>.from(newCpy);
+    added.removeWhere((item) => inventoryCopy.contains(item));
+    var removed = List<Item>.from(inventoryCopy);
+    removed.removeWhere((item) => newCpy.contains(item));
+    var oldCpy = inventoryCopy;
+    inventoryCopy = newCpy;
+    removed.forEach((item) {
+      var index = oldCpy.indexOf(item);
+      _animatedList?.removeItem(index, (context, animation) {
+        return removedItemBuilder(item, context, animation);
+      });
+    });
+    added.forEach((item) {
+      _animatedList?.insertItem(newCpy.indexOf(item));
+    });
+  }
+
+  AnimatedListState get _animatedList => listKey.currentState;
+
+  int get length => inventoryCopy.length;
+
+  Item operator [](int index) => inventoryCopy[index];
+
+  int indexOf(Item item) => inventoryCopy.indexOf(item);
 }

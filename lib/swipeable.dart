@@ -13,6 +13,7 @@ class Swipeable extends StatefulWidget {
   final double threshold;
 
   Swipeable({
+    Key key,
     this.child,
     this.background,
     this.secondaryBackground,
@@ -21,7 +22,7 @@ class Swipeable extends StatefulWidget {
     this.onSwipeCancel,
     this.onSwipeEnd,
     this.threshold = 64.0,
-  });
+  }) : super(key: key);
 
   State<StatefulWidget> createState() {
     return _SwipeableState();
