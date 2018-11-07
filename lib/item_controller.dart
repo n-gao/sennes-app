@@ -21,6 +21,8 @@ class ItemController {
   int _state;
   Set<ItemUpdate> _unconfirmedUpdates = Set();
 
+  var codec = latin1.fuse(base64);
+
   List<Item> get inventory {
     return _inventory.where((item) => item.amount > 0).toList(growable: false);
   }
@@ -68,9 +70,16 @@ class ItemController {
     Response response = await ServerApi.getInstance().fetchRequest(request);
     var key = await config.getEncryptionKey();
     for (var update in response.updates) {
-      var updateJson = json.decode(await cryptor.decrypt(update, key));
-      var itemUpdate = ItemUpdate.fromJson(updateJson);
-      _applyUpdate(itemUpdate);
+      try {
+        var blob = codec.decode(update);
+        var decrypted = await cryptor.decrypt(blob, key);
+        var updateJson = json.decode(decrypted);
+        var itemUpdate = ItemUpdate.fromJson(updateJson);
+        _applyUpdate(itemUpdate);
+      } catch (e) {
+        print("Failed to decrypt updates.");
+        throw Exception();
+      }
     }
     _state = response.newState;
     saveToStorage();
@@ -92,7 +101,7 @@ class ItemController {
     var blob = await cryptor.encrypt(json.encode(update), key);
     var fridgeId = await config.getFridgeId();
     await ServerApi.getInstance()
-        .fetchRequest(Request.addUpdate(fridgeId, blob));
+        .fetchRequest(Request.addUpdate(fridgeId, codec.encode(blob)));
     _unconfirmedUpdates.remove(update);
   }
 

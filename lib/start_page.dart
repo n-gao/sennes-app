@@ -141,7 +141,7 @@ class _StartPageState extends State<StartPage> {
                     separatorBuilder: _buildSeperator),
             key: _refreshIndicatorKey,
             onRefresh: () {
-              return new Future.delayed(const Duration(seconds: 2), () {});
+              return controller.requstItemUpdates();
             },
           ),
         ),

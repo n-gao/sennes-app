@@ -11,7 +11,8 @@ ItemUpdate _$ItemUpdateFromJson(Map<String, dynamic> json) {
       method: json['method'] as int,
       methodName: json['method_name'] as String,
       barcode: json['barcode'] as String,
-      timestamp: json['timestamp'] as int);
+      timestamp: json['timestamp'] as int,
+      name: json['name'] as String);
 }
 
 Map<String, dynamic> _$ItemUpdateToJson(ItemUpdate instance) =>
@@ -19,5 +20,6 @@ Map<String, dynamic> _$ItemUpdateToJson(ItemUpdate instance) =>
       'method': instance.method,
       'method_name': instance.methodName,
       'barcode': instance.barcode,
+      'name': instance.name,
       'timestamp': instance.timestamp
     };

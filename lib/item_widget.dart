@@ -36,6 +36,9 @@ class _ItemWidgetState extends State<ItemWidget> {
     if (widget.index != null) {
       controller = controller ?? await ItemController.getInstance();
       var item = await controller[widget.index];
+      if (item.dataComplete) {
+        await controller.requestItemInfos([item]);
+      }
       setState(() {
         this._item = item;
       });
@@ -89,7 +92,6 @@ class _ItemWidgetState extends State<ItemWidget> {
             }
           : null,
     );
-    print(loaded);
     if (loaded) {
       var swipeable = Swipeable(
           background: Container(

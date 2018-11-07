@@ -18,9 +18,10 @@ Item _$ItemFromJson(Map<String, dynamic> json) {
           ?.map((e) => e == null ? null : DateTime.parse(e as String))
           ?.toList(),
       website: json['website'] as String,
-      dataComplete: json['dataComplete'] as bool)
-    ..nutrition = json['nutrition'] as String
-    ..ingredients = json['ingredients'] as String;
+      ingredients: json['ingredients'] as String,
+      brand: json['brand'] as String,
+      nutrition: json['nutrition'] as String,
+      dataComplete: json['dataComplete'] as bool);
 }
 
 Map<String, dynamic> _$ItemToJson(Item instance) => <String, dynamic>{
@@ -31,6 +32,7 @@ Map<String, dynamic> _$ItemToJson(Item instance) => <String, dynamic>{
       'manufacturerNote': instance.manufacturerNote,
       'website': instance.website,
       'nutrition': instance.nutrition,
+      'brand': instance.brand,
       'amount': instance.amount,
       'changed': instance.changed?.map((e) => e?.toIso8601String())?.toList(),
       'ingredients': instance.ingredients,
