@@ -87,10 +87,10 @@ class ItemController {
   }
 
   Future requestItemInfos(List<Item> items) async {
-    Request request = Request.barcodeInfo(items.map((item) => item.barcode));
+    Request request = Request.barcodeInfo(items.map((item) => item.barcode).toList());
     Response response = await ServerApi.getInstance().fetchRequest(request);
     for (var i = 0; i < items.length; i++) {
-      items[i].updateInfo(response.barcodeInfo[i]);
+      items[i].updateInfo(response.barcodeInfo[i]['info']);
     }
     saveToStorage();
     _changedCallback?.call();

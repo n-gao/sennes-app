@@ -20,7 +20,7 @@ class ItemWidget extends StatefulWidget {
 }
 
 class _ItemWidgetState extends State<ItemWidget> {
-  ItemController controller;
+  ItemController _controller;
   Item _item;
 
   Item get item {
@@ -32,29 +32,43 @@ class _ItemWidgetState extends State<ItemWidget> {
     return item != null;
   }
 
-  void requestItem() async {
+  set item(value) {
+    this._item = item;
+    requestItemData();
+  }
+
+  get controller async {
+    return _controller ?? await ItemController.getInstance();
+  }
+
+  Future<void> requestItemData() async {
+    if (item == null || item.dataComplete) return;
+    var con = await controller;
+    await con.requestItemInfos([item]);
+    if (mounted) setState(() {});
+  }
+
+  Future<void> requestItem() async {
     if (widget.index != null) {
-      controller = controller ?? await ItemController.getInstance();
-      var item = await controller[widget.index];
-      if (item.dataComplete) {
-        await controller.requestItemInfos([item]);
-      }
-      setState(() {
-        this._item = item;
-      });
+      var con = await controller;
+      var item = con[widget.index];
+      if (mounted)
+        setState(() {
+          this.item = item;
+        });
     }
   }
 
   @override
   void initState() {
     super.initState();
-    requestItem();
+    requestItem().then((_) => requestItemData());
   }
 
   @override
   void didUpdateWidget(oldWidget) {
     super.didUpdateWidget(oldWidget);
-    requestItem();
+    requestItem().then((_) => requestItemData());
   }
 
   @override
