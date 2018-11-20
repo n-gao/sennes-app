@@ -9,6 +9,7 @@ import 'request.dart';
 import 'response.dart';
 import 'configuration.dart';
 import 'item_update.dart';
+import 'package:encrypt/encrypt.dart';
 
 typedef void InventoryChanged();
 
@@ -21,7 +22,7 @@ class ItemController {
   int _state;
   Set<ItemUpdate> _unconfirmedUpdates = Set();
 
-  var codec = latin1.fuse(base64);
+  var codec = utf8.fuse(base64);
 
   List<Item> get inventory {
     return _inventory.where((item) => item.amount > 0).toList(growable: false);
@@ -71,8 +72,16 @@ class ItemController {
     var key = await config.getEncryptionKey();
     for (var update in response.updates) {
       try {
-        var blob = codec.decode(update);
-        var decrypted = await cryptor.decrypt(blob, key);
+        var bytes = base64.decode(update);
+        var iv = utf8.decode(bytes.sublist(0, 8));
+        var data = utf8.decode(bytes.sublist(8));
+        print(iv);
+        print(data);
+        var cryptor = Encrypter(Salsa20(key, iv));
+        var decrypted = cryptor.decrypt(data);
+        print(decrypted);
+        // var blob = codec.decode(update);
+        // var decrypted = await cryptor.decrypt(blob, key);
         var updateJson = json.decode(decrypted);
         var itemUpdate = ItemUpdate.fromJson(updateJson);
         _applyUpdate(itemUpdate);
@@ -98,7 +107,11 @@ class ItemController {
 
   Future uploadUpdate(ItemUpdate update) async {
     var key = await config.getEncryptionKey();
-    var blob = await cryptor.encrypt(json.encode(update), key);
+    var updateS = json.encode(update);
+    final iv = '8bytesiv';
+    var cryptor = Encrypter(Salsa20(key, iv));
+    var blob = cryptor.encrypt(updateS);
+    // var blob = await cryptor.encrypt(json.encode(update), key);
     var fridgeId = await config.getFridgeId();
     await ServerApi.getInstance()
         .fetchRequest(Request.addUpdate(fridgeId, codec.encode(blob)));
