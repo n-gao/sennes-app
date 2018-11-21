@@ -4,6 +4,7 @@ import 'item_controller.dart';
 import 'scan_page.dart';
 import 'main.dart';
 import 'item_widget.dart';
+import 'dart:async';
 
 class StartPage extends StatefulWidget {
   StartPage({Key key, this.title}) : super(key: key);
@@ -176,6 +177,9 @@ class _StartPageState extends State<StartPage> {
         for (var item in items) {
           controller.add(item);
         }
+      });
+      Timer.periodic(Duration(seconds: 2), (timer) {
+        controller.requstItemUpdates();
       });
     });
   }

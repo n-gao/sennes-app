@@ -36,6 +36,7 @@ class ItemController {
     if (_instance == null) {
       _instance = ItemController();
       await _instance.readFromStorage();
+      await _instance.requstItemUpdates();
     }
     return _instance;
   }
@@ -51,9 +52,11 @@ class ItemController {
       _inventory = stored['inventory'] as List<Item>;
       _inventory.forEach((item) => _inventoryMap[item.barcode] = item);
       _state = stored['state'] as int;
+      print("[Inventory] Read from storage.");
     } catch (error) {
       _inventory = [];
       _state = 0;
+      print("[Inventory] No storage present.");
     }
     _unconfirmedUpdates = Set();
   }
@@ -68,6 +71,9 @@ class ItemController {
   Future requstItemUpdates() async {
     Request request = Request.getUpdates(await config.getFridgeId(), _state);
     Response response = await ServerApi.getInstance().fetchRequest(request);
+    if (_state != response.newState) {
+      readFromStorage();
+    }
     var key = await config.getEncryptionKey();
     for (var update in response.updates) {
       try {
@@ -76,7 +82,7 @@ class ItemController {
         var itemUpdate = ItemUpdate.fromJson(updateJson);
         _applyUpdate(itemUpdate);
       } catch (e) {
-        print("Failed to decrypt updates.");
+        print("[Inventory] Failed to decrypt updates.");
         throw Exception();
       }
     }
@@ -97,10 +103,10 @@ class ItemController {
   }
 
   Future uploadUpdate(ItemUpdate update) async {
-    var key = await config.getEncryptionKey();
-    var updateS = json.encode(update);
-    var blob = encrypt(updateS, key);
-    var fridgeId = await config.getFridgeId();
+    final key = await config.getEncryptionKey();
+    final updateS = json.encode(update);
+    final blob = encrypt(updateS, key);
+    final fridgeId = await config.getFridgeId();
     await ServerApi.getInstance().fetchRequest(
         Request.addUpdate(fridgeId, Uri.encodeQueryComponent(blob)));
     _unconfirmedUpdates.remove(update);
