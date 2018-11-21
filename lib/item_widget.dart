@@ -88,7 +88,7 @@ class _ItemWidgetState extends State<ItemWidget> {
                 color: Colors.white,
               ),
       ),
-      title: loaded ? Text(item.name) : Container(),
+      title: loaded ? Text(item.displayName) : Container(),
       subtitle: loaded ? Text("${item.amount}x ${item.size}") : Container(),
       trailing: loaded ? Text("scanned ${item.dateString}") : Container(),
       onTap: loaded

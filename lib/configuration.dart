@@ -23,7 +23,7 @@ class Configuration {
   }
 
   Future<String> getEncryptionKey() async {
-    return 'STbHC6sDeLE1xoFfkIBzVA==:nr8EOH062hz5SrhAV/+KJJ1JadEi9DkYGeNdSV1Uuy4=';
+    return 'STbHC6sDeLE1xoFfkIBzVA==:nr8EOH0';
     if (_encryptionKey == null) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       _encryptionKey = prefs.getString('encryption_key') ??
