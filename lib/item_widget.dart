@@ -21,10 +21,9 @@ class ItemWidget extends StatefulWidget {
 
 class _ItemWidgetState extends State<ItemWidget> {
   ItemController _controller;
-  Item _item;
 
   Item get item {
-    return widget.item ?? _item;
+    return widget.item ?? (_controller != null ? _controller[widget.index] : null);
   }
 
   get loaded {
@@ -32,16 +31,12 @@ class _ItemWidgetState extends State<ItemWidget> {
     return item != null;
   }
 
-  set item(value) {
-    this._item = item;
-    requestItemData();
-  }
-
   Future<ItemController> get controller async {
     return _controller ?? await ItemController.getInstance();
   }
 
   Future<void> requestItemData() async {
+    return;
     if (item == null || item.dataComplete) return;
     var con = await controller;
     await con.requestItemInfos([item]);
@@ -51,10 +46,9 @@ class _ItemWidgetState extends State<ItemWidget> {
   Future<void> requestItem() async {
     if (widget.index != null) {
       var con = await controller;
-      var item = await con[widget.index];
       if (mounted)
         setState(() {
-          this.item = item;
+          this._controller = con;
         });
     }
   }
@@ -62,13 +56,13 @@ class _ItemWidgetState extends State<ItemWidget> {
   @override
   void initState() {
     super.initState();
-    requestItem().then((_) => requestItemData());
+    requestItem();
   }
 
   @override
   void didUpdateWidget(oldWidget) {
     super.didUpdateWidget(oldWidget);
-    requestItem().then((_) => requestItemData());
+    requestItem();
   }
 
   @override
@@ -119,17 +113,16 @@ class _ItemWidgetState extends State<ItemWidget> {
             child: Icon(Icons.remove, color: Colors.white),
           ),
           onSwipeRight: () {
-            controller.then((con) {
-              setState(() {
-                con.decrease(index: widget.index);
-              });
+            controller.then((con) { 
+              con.decrease(index: widget.index);
+              setState(() {print(item.amount);});
             });
           },
           onSwipeLeft: () {
             controller.then((con) {
-              setState(() {
-                con.increase(index: widget.index);
-              });
+              con.increase(index: widget.index);
+              print(widget.item);
+              setState(() {print(item.amount);});
             });
           },
           threshold: 128.0,

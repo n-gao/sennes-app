@@ -17,14 +17,17 @@ typedef void InventoryChanged();
 class ItemController {
   final cryptor = PlatformStringCryptor();
   final Configuration config;
-  Map<String, Item> _inventoryMap;
-  List<Item> _inventory;
+  Map<String, Item> _inventoryMap = Map();
+  List<Item> _inventory = [];
   InventoryChanged _changedCallback;
-  int _state = -1;
+  int _state = 0;
   Set<ItemUpdate> _unconfirmedUpdates = Set();
 
+  List<Item> _safeInventory = [];
+  int _safeState = -1;
+
   List<Item> get inventory {
-    return _inventory.where((item) => item.amount > 0).toList(growable: false);
+    return _inventory.where((item) => item.amount > 0).toList();
   }
 
   bool get confirmed {
@@ -43,39 +46,45 @@ class ItemController {
 
   ItemController() : config = Configuration.getInstance();
 
-  Future readFromStorage() async {
-    var localFile = await _inventoryFile;
+  void restoreToSafeState() {
+    _state = _safeState;
+    _inventory = _safeInventory.map((i) => Item.fromJson(i.toJson())).toList();
     _inventoryMap = Map();
+    _inventory.forEach((item) => _inventoryMap[item.identifier] = item);
+    _unconfirmedUpdates = Set();
+  }
+
+  Future readFromStorage() async {
+    final localFile = await _inventoryFile;
     try {
-      var content = await localFile.readAsString();
-      var stored = json.decode(content);
-      _inventory = (stored['inventory'] as List).map((i) => Item.fromJson(i)).toList();
-      _inventory.forEach((item) => _inventoryMap[item.barcode] = item);
-      _state = stored['state'] as int;
+      final content = await localFile.readAsString();
+      final stored = json.decode(content);
+      _safeInventory =
+          (stored['inventory'] as List).map((i) => Item.fromJson(i)).toList();
+      _safeState = stored['state'] as int;
+      restoreToSafeState();
       print("[Inventory] Read from storage.");
     } catch (error) {
-      _inventory = [];
-      _state = 0;
       print("[Inventory] No storage present.");
     }
-    _unconfirmedUpdates = Set();
   }
 
   Future saveToStorage() async {
     if (!confirmed) throw Error();
+    _safeState = _state;
+    _safeInventory = _inventory.map((i) => Item.fromJson(i.toJson())).toList();
     try {
       var localFile = await _inventoryFile;
-      await localFile
-          .writeAsString(json.encode({'inventory': _inventory, 'state': _state}));
+      await localFile.writeAsString(
+          json.encode({'inventory': _inventory, 'state': _state}));
       print("[Inventory] Saved inventory");
-    } catch(e) {
+    } catch (e) {
       print("[Inventory] Failed to save inventory");
       throw Exception();
     }
   }
 
   Future requstItemUpdates() async {
-    print("[Inventory] Requesting item updates");
     Request request = Request.getUpdates(await config.getFridgeId(), _state);
     Response response;
     try {
@@ -87,7 +96,8 @@ class ItemController {
     if (_state == response.newState) {
       return;
     }
-    readFromStorage();
+    _unconfirmedUpdates.clear();
+    restoreToSafeState();
     var key = await config.getEncryptionKey();
     for (var update in response.updates) {
       try {
@@ -97,12 +107,16 @@ class ItemController {
         _applyUpdate(itemUpdate);
       } catch (e) {
         print("[Inventory] Failed to decrypt updates.");
-        throw Exception();
+        throw e;
       }
     }
+    print("[Inventory] Updated state from " +
+        _state.toString() +
+        " to " +
+        response.newState.toString());
     _state = response.newState;
-    saveToStorage();
     _changedCallback?.call();
+    await saveToStorage();
   }
 
   Future requestItemInfos(List<Item> items) async {
@@ -112,7 +126,6 @@ class ItemController {
     for (var i = 0; i < items.length; i++) {
       items[i].updateInfo(response.barcodeInfo[i]['info']);
     }
-    await saveToStorage();
     _changedCallback?.call();
   }
 
@@ -130,19 +143,17 @@ class ItemController {
     _unconfirmedUpdates.add(update);
     _applyUpdate(update);
     uploadUpdate(update);
+    _changedCallback?.call();
   }
 
   void _applyUpdate(ItemUpdate update) {
     DateTime time = DateTime.fromMillisecondsSinceEpoch(update.timestamp);
-    print(update.name);
-    print(_inventoryMap.keys);
     if (_inventoryMap.containsKey(update.identifier)) {
       _inventoryMap[update.identifier].amount += update.method == 0 ? 1 : -1;
       _inventoryMap[update.identifier].changed.add(time);
     } else {
       add(Item(barcode: update.barcode, name: update.name, changed: [time]));
     }
-    _changedCallback?.call();
   }
 
   void setChangedCallback(InventoryChanged callback) {
@@ -185,7 +196,7 @@ class ItemController {
     }
   }
 
-  Future<Item> operator [](dynamic index) async {
+  Item operator [](dynamic index) {
     try {
       if (index is int) {
         return inventory[index];
@@ -193,9 +204,7 @@ class ItemController {
       if (index is String) {
         return _inventoryMap[index];
       }
-    } catch(e) {
-
-    }
+    } catch (e) {}
     return null;
   }
 
@@ -235,6 +244,7 @@ class ItemListModel {
     var oldCpy = inventoryCopy;
     removed.forEach((item) {
       var index = oldCpy.indexOf(item);
+      oldCpy.remove(item);
       _animatedList?.removeItem(index, (context, animation) {
         return removedItemBuilder(item, context, animation);
       });

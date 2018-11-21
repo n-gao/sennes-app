@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'item.dart';
+import 'main.dart';
 
 class ItemPage extends StatefulWidget {
   ItemPage({Key key, this.item}) : super(key: key);
@@ -32,8 +33,9 @@ class _ItemPageState extends State<ItemPage> {
                 collapseMode: CollapseMode.parallax,
                 centerTitle: true,
                 title: Text(widget.item.name),
-                background:
-                    Image.network(widget.item.imageUrl, fit: BoxFit.cover),
+                background: widget.item.imageUrl != null ?
+                    Image.network(widget.item.imageUrl, fit: BoxFit.cover) :
+                    Container(color: SennesApp.primaryColor,),
               ),
             )
           ];

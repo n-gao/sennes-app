@@ -74,7 +74,25 @@ class Item extends Comparable<Item> {
     return DateFormat("dd.MM.yy").format(addedDate.toLocal());
   }
 
+  void updateFrom(Item other) {
+    this.barcode = other.barcode;
+    this.amount = other.amount;
+    this.brand = other.brand;
+    this.changed = other.changed;
+    this.dataComplete = other.dataComplete;
+    this.imageUrl = other.imageUrl;
+    this.ingredients = other.ingredients;
+    this.manufacturerNote = other.manufacturerNote;
+    this.name = other.name;
+    this.nutrition = other.nutrition;
+    this.size = other.size;
+    this.website = other.website;
+  }
+
   factory Item.fromJson(Map<String, dynamic> json) => _$ItemFromJson(json);
 
   Map<String, dynamic> toJson() => _$ItemToJson(this);
+
+  bool operator == (o) => o is Item && identifier == o.identifier;
+  int get hashCode => identifier.hashCode;
 }

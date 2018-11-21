@@ -217,7 +217,7 @@ class _StartPageState extends State<StartPage> {
   Widget _buildAnimatedItem(context, index, animation) {
     return ItemWidget(
       index: controller != null ? index : null,
-      item: listModel != null ? listModel[index] : null,
+      item: null,
       animation: animation,
     );
   }
