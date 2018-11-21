@@ -29,44 +29,52 @@ enum _StartPagePopupMenu { Settings }
 class _StartPageState extends State<StartPage> {
   final items = <Item>[
     Item(
+        barcode: '1',
         name: "Coke",
         amount: 1,
         size: "2l",
         imageUrl: "https://cdn.huntoffice.ie/images/D/can-of-coke.jpg"),
     Item(
+        barcode: '2',
         name: "Tomatoes",
         amount: 12,
         imageUrl:
             "https://images-na.ssl-images-amazon.com/images/I/81avkS31xRL._SY355_.jpg"),
     Item(
+        barcode: '3',
         name: "Cream Cheese",
         amount: 1,
         size: "200ml",
         imageUrl: "https://pics.drugstore.com/prodimg/419651/900.jpg"),
     Item(
+        barcode: '4',
         name: "Cheddar",
         amount: 2,
         imageUrl:
             "https://www.maggi.de/Lists/Maggi-Images/maggi-kochstudio/wissen/lexikon/MAGGI-lexikon-cheddar.jpg"),
     Item(
+        barcode: '5',
         name: "Milk",
         amount: 3,
         size: "1l",
         imageUrl:
             "https://target.scene7.com/is/image/Target/GUEST_ebef1ac1-6e80-484b-aaff-36a1a74b9e82?wid=488&hei=488&fmt=pjpeg"),
     Item(
+        barcode: '6',
         name: "Yogurt",
         amount: 6,
         size: "6 pack",
         imageUrl:
             "https://www.heb.com.mx/media/catalog/product/cache/20/image/d954a60aa48ef57022b0eb878e93bc1f/Y/o/455179_635013011.png"),
     Item(
+        barcode: '7',
         name: "Orange Juice",
         amount: 1,
         size: "1l",
         imageUrl:
             "https://static.meijer.com/Media/000/16300/0001630016565_2_A1C1_0600.png"),
     Item(
+        barcode: '8',
         name: "Strawberry Marmalade",
         amount: 1,
         size: "500g",
@@ -174,6 +182,7 @@ class _StartPageState extends State<StartPage> {
     super.initState();
     loadModel().then((result) {
       setState(() {
+        print("Adding");
         for (var item in items) {
           controller.add(item);
         }
@@ -208,7 +217,7 @@ class _StartPageState extends State<StartPage> {
   Widget _buildAnimatedItem(context, index, animation) {
     return ItemWidget(
       index: controller != null ? index : null,
-      item: listModel[index],
+      item: listModel != null ? listModel[index] : null,
       animation: animation,
     );
   }

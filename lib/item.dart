@@ -25,7 +25,7 @@ class Item extends Comparable<Item> {
     this.name='',
     this.amount=1,
     this.size='',
-    this.imageUrl='',
+    this.imageUrl=null,
     this.manufacturerNote='',
     this.changed,
     this.website='',
@@ -43,7 +43,7 @@ class Item extends Comparable<Item> {
 
   void updateInfo(Map<String, dynamic> update) {
     this.name = readUpdate(update, 'description', '<missing>');
-    this.imageUrl = readUpdate(update, 'imageUrl', '');
+    this.imageUrl = readUpdate(update, 'image', null);
     this.size = readUpdate(update, 'uom', '');
     this.manufacturerNote = readUpdate(update, 'usage', 'No information provided');
     this.ingredients = readUpdate(update, 'ingredients', '');

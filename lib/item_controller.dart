@@ -20,7 +20,7 @@ class ItemController {
   Map<String, Item> _inventoryMap;
   List<Item> _inventory;
   InventoryChanged _changedCallback;
-  int _state;
+  int _state = -1;
   Set<ItemUpdate> _unconfirmedUpdates = Set();
 
   List<Item> get inventory {
@@ -49,7 +49,7 @@ class ItemController {
     try {
       var content = await localFile.readAsString();
       var stored = json.decode(content);
-      _inventory = stored['inventory'] as List<Item>;
+      _inventory = (stored['inventory'] as List).map((i) => Item.fromJson(i)).toList();
       _inventory.forEach((item) => _inventoryMap[item.barcode] = item);
       _state = stored['state'] as int;
       print("[Inventory] Read from storage.");
@@ -63,17 +63,31 @@ class ItemController {
 
   Future saveToStorage() async {
     if (!confirmed) throw Error();
-    var localFile = await _inventoryFile;
-    await localFile
-        .writeAsString(json.encode({'inventory': _inventory, 'state': _state}));
+    try {
+      var localFile = await _inventoryFile;
+      await localFile
+          .writeAsString(json.encode({'inventory': _inventory, 'state': _state}));
+      print("[Inventory] Saved inventory");
+    } catch(e) {
+      print("[Inventory] Failed to save inventory");
+      throw Exception();
+    }
   }
 
   Future requstItemUpdates() async {
+    print("[Inventory] Requesting item updates");
     Request request = Request.getUpdates(await config.getFridgeId(), _state);
-    Response response = await ServerApi.getInstance().fetchRequest(request);
-    if (_state != response.newState) {
-      readFromStorage();
+    Response response;
+    try {
+      response = await ServerApi.getInstance().fetchRequest(request);
+    } catch (e) {
+      print("[Inventory] Failed to reach server");
+      return;
     }
+    if (_state == response.newState) {
+      return;
+    }
+    readFromStorage();
     var key = await config.getEncryptionKey();
     for (var update in response.updates) {
       try {
@@ -98,7 +112,7 @@ class ItemController {
     for (var i = 0; i < items.length; i++) {
       items[i].updateInfo(response.barcodeInfo[i]['info']);
     }
-    saveToStorage();
+    await saveToStorage();
     _changedCallback?.call();
   }
 
@@ -168,18 +182,21 @@ class ItemController {
       _inventoryMap[item.identifier] = item;
       _inventory.add(item);
       _inventory.sort();
-      _changedCallback?.call();
     }
   }
 
   Future<Item> operator [](dynamic index) async {
-    if (index is int) {
-      return inventory[index];
+    try {
+      if (index is int) {
+        return inventory[index];
+      }
+      if (index is String) {
+        return _inventoryMap[index];
+      }
+    } catch(e) {
+
     }
-    if (index is String) {
-      return _inventoryMap[index];
-    }
-    throw TypeError();
+    return null;
   }
 
   int get length {
@@ -210,19 +227,19 @@ class ItemListModel {
   }
 
   void _updateAnimatedList() {
-    var newCpy = List<Item>.from(controller.inventory);
+    var newCpy = controller.inventory;
     var added = List<Item>.from(newCpy);
     added.removeWhere((item) => inventoryCopy.contains(item));
     var removed = List<Item>.from(inventoryCopy);
     removed.removeWhere((item) => newCpy.contains(item));
     var oldCpy = inventoryCopy;
-    inventoryCopy = newCpy;
     removed.forEach((item) {
       var index = oldCpy.indexOf(item);
       _animatedList?.removeItem(index, (context, animation) {
         return removedItemBuilder(item, context, animation);
       });
     });
+    inventoryCopy = newCpy;
     added.forEach((item) {
       _animatedList?.insertItem(newCpy.indexOf(item));
     });

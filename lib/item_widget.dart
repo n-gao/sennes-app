@@ -37,7 +37,7 @@ class _ItemWidgetState extends State<ItemWidget> {
     requestItemData();
   }
 
-  get controller async {
+  Future<ItemController> get controller async {
     return _controller ?? await ItemController.getInstance();
   }
 
@@ -51,7 +51,7 @@ class _ItemWidgetState extends State<ItemWidget> {
   Future<void> requestItem() async {
     if (widget.index != null) {
       var con = await controller;
-      var item = con[widget.index];
+      var item = await con[widget.index];
       if (mounted)
         setState(() {
           this.item = item;
@@ -81,7 +81,7 @@ class _ItemWidgetState extends State<ItemWidget> {
         color: Colors.white,
         type: MaterialType.card,
         clipBehavior: Clip.antiAlias,
-        child: loaded
+        child: loaded && item.imageUrl != null
             ? Image.network(
                 item.imageUrl,
                 width: 48.0,
@@ -119,13 +119,17 @@ class _ItemWidgetState extends State<ItemWidget> {
             child: Icon(Icons.remove, color: Colors.white),
           ),
           onSwipeRight: () {
-            setState(() {
-              controller.decrease(index: widget.index);
+            controller.then((con) {
+              setState(() {
+                con.decrease(index: widget.index);
+              });
             });
           },
           onSwipeLeft: () {
-            setState(() {
-              controller.increase(index: widget.index);
+            controller.then((con) {
+              setState(() {
+                con.increase(index: widget.index);
+              });
             });
           },
           threshold: 128.0,
