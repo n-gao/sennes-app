@@ -9,7 +9,8 @@ import 'request.dart';
 import 'response.dart';
 import 'configuration.dart';
 import 'item_update.dart';
-import 'package:encrypt/encrypt.dart';
+import 'encrypt_util.dart';
+import 'dart:core';
 
 typedef void InventoryChanged();
 
@@ -21,8 +22,6 @@ class ItemController {
   InventoryChanged _changedCallback;
   int _state;
   Set<ItemUpdate> _unconfirmedUpdates = Set();
-
-  var codec = utf8.fuse(base64);
 
   List<Item> get inventory {
     return _inventory.where((item) => item.amount > 0).toList(growable: false);
@@ -72,16 +71,7 @@ class ItemController {
     var key = await config.getEncryptionKey();
     for (var update in response.updates) {
       try {
-        var bytes = base64.decode(update);
-        var iv = utf8.decode(bytes.sublist(0, 8));
-        var data = utf8.decode(bytes.sublist(8));
-        print(iv);
-        print(data);
-        var cryptor = Encrypter(Salsa20(key, iv));
-        var decrypted = cryptor.decrypt(data);
-        print(decrypted);
-        // var blob = codec.decode(update);
-        // var decrypted = await cryptor.decrypt(blob, key);
+        var decrypted = decrypt(update, key);
         var updateJson = json.decode(decrypted);
         var itemUpdate = ItemUpdate.fromJson(updateJson);
         _applyUpdate(itemUpdate);
@@ -96,7 +86,8 @@ class ItemController {
   }
 
   Future requestItemInfos(List<Item> items) async {
-    Request request = Request.barcodeInfo(items.map((item) => item.barcode).toList());
+    Request request =
+        Request.barcodeInfo(items.map((item) => item.barcode).toList());
     Response response = await ServerApi.getInstance().fetchRequest(request);
     for (var i = 0; i < items.length; i++) {
       items[i].updateInfo(response.barcodeInfo[i]['info']);
@@ -108,13 +99,10 @@ class ItemController {
   Future uploadUpdate(ItemUpdate update) async {
     var key = await config.getEncryptionKey();
     var updateS = json.encode(update);
-    final iv = '8bytesiv';
-    var cryptor = Encrypter(Salsa20(key, iv));
-    var blob = cryptor.encrypt(updateS);
-    // var blob = await cryptor.encrypt(json.encode(update), key);
+    var blob = encrypt(updateS, key);
     var fridgeId = await config.getFridgeId();
-    await ServerApi.getInstance()
-        .fetchRequest(Request.addUpdate(fridgeId, codec.encode(blob)));
+    await ServerApi.getInstance().fetchRequest(
+        Request.addUpdate(fridgeId, Uri.encodeQueryComponent(blob)));
     _unconfirmedUpdates.remove(update);
   }
 
