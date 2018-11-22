@@ -21,7 +21,6 @@ class ItemController {
   List<Item> _inventory = [];
   InventoryChanged _changedCallback;
   int _state = 0;
-  Set<ItemUpdate> _unconfirmedUpdates = Set();
 
   List<Item> _safeInventory = [];
   int _safeState = -1;
@@ -30,16 +29,14 @@ class ItemController {
     return _inventory.where((item) => item.amount > 0).toList();
   }
 
-  bool get confirmed {
-    return _unconfirmedUpdates.length == 0;
-  }
+  bool confirmed;
 
   static ItemController _instance;
   static Future<ItemController> getInstance() async {
     if (_instance == null) {
       _instance = ItemController();
       await _instance.readFromStorage();
-      await _instance.requstItemUpdates();
+      await _instance.requestItemUpdates();
     }
     return _instance;
   }
@@ -51,7 +48,7 @@ class ItemController {
     _inventory = _safeInventory.map((i) => Item.fromJson(i.toJson())).toList();
     _inventoryMap = Map();
     _inventory.forEach((item) => _inventoryMap[item.identifier] = item);
-    _unconfirmedUpdates = Set();
+    confirmed = true;
   }
 
   Future readFromStorage() async {
@@ -70,7 +67,7 @@ class ItemController {
   }
 
   Future saveToStorage() async {
-    if (!confirmed) throw Error();
+    if (!confirmed) return;
     _safeState = _state;
     _safeInventory = _inventory.map((i) => Item.fromJson(i.toJson())).toList();
     try {
@@ -84,7 +81,7 @@ class ItemController {
     }
   }
 
-  Future requstItemUpdates() async {
+  Future requestItemUpdates() async {
     Request request = Request.getUpdates(await config.getFridgeId(), _state);
     Response response;
     try {
@@ -96,7 +93,6 @@ class ItemController {
     if (_state == response.newState) {
       return;
     }
-    _unconfirmedUpdates.clear();
     restoreToSafeState();
     var key = await config.getEncryptionKey();
     for (var update in response.updates) {
@@ -127,6 +123,7 @@ class ItemController {
       items[i].updateInfo(response.barcodeInfo[i]['info']);
     }
     _changedCallback?.call();
+    saveToStorage();
   }
 
   Future uploadUpdate(ItemUpdate update) async {
@@ -136,11 +133,10 @@ class ItemController {
     final fridgeId = await config.getFridgeId();
     await ServerApi.getInstance().fetchRequest(
         Request.addUpdate(fridgeId, Uri.encodeQueryComponent(blob)));
-    _unconfirmedUpdates.remove(update);
   }
 
   void applyUpdate(ItemUpdate update) {
-    _unconfirmedUpdates.add(update);
+    confirmed = false;
     _applyUpdate(update);
     uploadUpdate(update);
     _changedCallback?.call();

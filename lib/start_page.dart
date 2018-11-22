@@ -150,7 +150,7 @@ class _StartPageState extends State<StartPage> {
                     separatorBuilder: _buildSeperator),
             key: _refreshIndicatorKey,
             onRefresh: () {
-              return controller.requstItemUpdates();
+              return controller.requestItemUpdates();
             },
           ),
         ),
@@ -188,7 +188,7 @@ class _StartPageState extends State<StartPage> {
         }
       });
       Timer.periodic(Duration(seconds: 2), (timer) {
-        controller.requstItemUpdates();
+        controller.requestItemUpdates();
       });
     });
   }
