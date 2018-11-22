@@ -10,29 +10,31 @@ class Item extends Comparable<Item> {
   String barcode;
   String name;
   String imageUrl;
+  String thumbnail;
   String size;
   String manufacturerNote;
   String website;
-  String nutrition;
   String brand;
   int amount;
   List<DateTime> changed;
-  String ingredients;
+  Map<String, dynamic> ingredients;
+  Map<String, dynamic> nutriments;
   bool dataComplete;
 
   Item({
     this.barcode,
-    this.name='',
-    this.amount=1,
-    this.size='',
-    this.imageUrl=null,
-    this.manufacturerNote='',
+    this.name = '',
+    this.amount = 1,
+    this.size = '',
+    this.imageUrl = null,
+    this.thumbnail = null,
+    this.manufacturerNote = '',
     this.changed,
-    this.website='',
-    this.ingredients='',
-    this.brand='',
-    this.nutrition='',
-    this.dataComplete=false
+    this.website = '',
+    this.brand = '',
+    this.dataComplete = false,
+    this.ingredients = null,
+    this.nutriments = null,
   }) {
     changed = changed ?? [DateTime.now()];
   }
@@ -42,14 +44,16 @@ class Item extends Comparable<Item> {
   }
 
   void updateInfo(Map<String, dynamic> update) {
-    this.name = readUpdate(update, 'description', '<missing>');
-    this.imageUrl = readUpdate(update, 'image', null);
-    this.size = readUpdate(update, 'uom', '');
-    this.manufacturerNote = readUpdate(update, 'usage', 'No information provided');
+    this.name = readUpdate(update, 'product_name', '<missing>');
+    this.imageUrl = readUpdate(update, 'image_url', null);
+    this.thumbnail = readUpdate(update, 'image_front_thumb_url', null);
+    this.size = readUpdate(update, 'quantity', '');
+    this.manufacturerNote =
+        readUpdate(update, 'usage', 'No information provided');
     this.ingredients = readUpdate(update, 'ingredients', '');
     this.website = readUpdate(update, 'product_web_page', '');
-    this.nutrition = readUpdate(update, 'nutrition', '');
-    this.brand = readUpdate(update, 'brand', '');
+    this.nutriments = readUpdate(update, 'nutriments', null);
+    this.brand = readUpdate(update, 'brands', '');
     this.dataComplete = true;
   }
 
@@ -74,25 +78,10 @@ class Item extends Comparable<Item> {
     return DateFormat("dd.MM.yy").format(addedDate.toLocal());
   }
 
-  void updateFrom(Item other) {
-    this.barcode = other.barcode;
-    this.amount = other.amount;
-    this.brand = other.brand;
-    this.changed = other.changed;
-    this.dataComplete = other.dataComplete;
-    this.imageUrl = other.imageUrl;
-    this.ingredients = other.ingredients;
-    this.manufacturerNote = other.manufacturerNote;
-    this.name = other.name;
-    this.nutrition = other.nutrition;
-    this.size = other.size;
-    this.website = other.website;
-  }
-
   factory Item.fromJson(Map<String, dynamic> json) => _$ItemFromJson(json);
 
   Map<String, dynamic> toJson() => _$ItemToJson(this);
 
-  bool operator == (o) => o is Item && identifier == o.identifier;
+  bool operator ==(o) => o is Item && identifier == o.identifier;
   int get hashCode => identifier.hashCode;
 }
