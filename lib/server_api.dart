@@ -16,7 +16,7 @@ class ServerApi {
   }
 
   Future<Response> fetchRequest(Request request) async {
-    var url = 'http://10.0.2.2:3000/api?request=';
+    var url = 'http://sennes.n-gao.de/api?request=';
     var reqString = json.encode(request.toJson());
     final response = await http.get(url + reqString);
     if (response.statusCode == 200) {
