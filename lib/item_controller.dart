@@ -96,15 +96,10 @@ class ItemController {
     restoreToSafeState();
     var key = await config.getEncryptionKey();
     for (var update in response.updates) {
-      try {
-        var decrypted = decrypt(update, key);
-        var updateJson = json.decode(decrypted);
-        var itemUpdate = ItemUpdate.fromJson(updateJson);
-        _applyUpdate(itemUpdate);
-      } catch (e) {
-        print("[Inventory] Failed to decrypt updates.");
-        throw e;
-      }
+      var decrypted = decrypt(update, key);
+      var updateJson = json.decode(decrypted);
+      var itemUpdate = ItemUpdate.fromJson(updateJson);
+      _applyUpdate(itemUpdate);
     }
     print("[Inventory] Updated state from " +
         _state.toString() +
@@ -216,7 +211,8 @@ class ItemController {
 
   Future<File> get _inventoryFile async {
     final path = await _appDocDir;
-    return File('$path/inventory.json');
+    final fridgeId = await config.getFridgeId();
+    return File('$path/inventory_$fridgeId.json');
   }
 }
 

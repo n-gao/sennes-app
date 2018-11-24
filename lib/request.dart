@@ -5,7 +5,7 @@ part 'request.g.dart';
 @JsonSerializable()
 class Request {
   @JsonKey(name: 'fridge_id')
-  int fridgeId;
+  String fridgeId;
   String method;
   int state;
   List<String> barcodes;

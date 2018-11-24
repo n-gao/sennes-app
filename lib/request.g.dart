@@ -8,7 +8,7 @@ part of 'request.dart';
 
 Request _$RequestFromJson(Map<String, dynamic> json) {
   return Request(
-      fridgeId: json['fridge_id'] as int,
+      fridgeId: json['fridge_id'] as String,
       method: json['method'] as String,
       state: json['state'] as int,
       barcodes: (json['barcodes'] as List)?.map((e) => e as String)?.toList(),

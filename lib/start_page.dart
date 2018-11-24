@@ -150,7 +150,7 @@ class _StartPageState extends State<StartPage> {
                     separatorBuilder: _buildSeperator),
             key: _refreshIndicatorKey,
             onRefresh: () {
-              return controller.requestItemUpdates();
+              return controller?.requestItemUpdates();
             },
           ),
         ),
@@ -181,14 +181,14 @@ class _StartPageState extends State<StartPage> {
   void initState() {
     super.initState();
     loadModel().then((result) {
-      setState(() {
-        print("Adding");
-        for (var item in items) {
-          controller.add(item);
-        }
-      });
+      // setState(() {
+      //   print("Adding");
+      //   for (var item in items) {
+      //     controller.add(item);
+      //   }
+      // });
       Timer.periodic(Duration(seconds: 2), (timer) {
-        controller.requestItemUpdates();
+        controller?.requestItemUpdates();
       });
     });
   }
