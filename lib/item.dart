@@ -23,7 +23,7 @@ class Item extends Comparable<Item> {
 
   Item({
     this.barcode,
-    this.name = '',
+    this.name = null,
     this.amount = 1,
     this.size = '',
     this.imageUrl = null,
