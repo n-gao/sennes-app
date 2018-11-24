@@ -21,7 +21,7 @@ Item _$ItemFromJson(Map<String, dynamic> json) {
       website: json['website'] as String,
       brand: json['brand'] as String,
       dataComplete: json['dataComplete'] as bool,
-      ingredients: json['ingredients'] as Map<String, dynamic>,
+      ingredients: json['ingredients'] as List,
       nutriments: json['nutriments'] as Map<String, dynamic>);
 }
 

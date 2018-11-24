@@ -36,7 +36,6 @@ class _ItemWidgetState extends State<ItemWidget> {
   }
 
   Future<void> requestItemData() async {
-    return;
     if (item == null || item.dataComplete) return;
     var con = await controller;
     await con.requestItemInfos([item]);
@@ -49,6 +48,7 @@ class _ItemWidgetState extends State<ItemWidget> {
       if (mounted)
         setState(() {
           this._controller = con;
+          requestItemData();
         });
     }
   }

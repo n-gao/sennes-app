@@ -17,7 +17,7 @@ class Item extends Comparable<Item> {
   String brand;
   int amount;
   List<DateTime> changed;
-  Map<String, dynamic> ingredients;
+  List<dynamic> ingredients;
   Map<String, dynamic> nutriments;
   bool dataComplete;
 
@@ -50,8 +50,8 @@ class Item extends Comparable<Item> {
     this.size = readUpdate(update, 'quantity', '');
     this.manufacturerNote =
         readUpdate(update, 'usage', 'No information provided');
-    this.ingredients = readUpdate(update, 'ingredients', '');
-    this.website = readUpdate(update, 'product_web_page', '');
+    this.ingredients = readUpdate(update, 'ingredients', null);
+    this.website = readUpdate(update, 'product_web_page', null);
     this.nutriments = readUpdate(update, 'nutriments', null);
     this.brand = readUpdate(update, 'brands', '');
     this.dataComplete = true;
