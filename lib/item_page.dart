@@ -12,6 +12,7 @@ class ItemPage extends StatefulWidget {
 }
 
 class _ItemPageState extends State<ItemPage> {
+
   @override
   void initState() {}
 
@@ -20,6 +21,32 @@ class _ItemPageState extends State<ItemPage> {
 
   @override
   Widget build(BuildContext context) {
+    List<DataRow> nutritionRows = List<DataRow>();
+    if (widget.item.nutriments != null) {
+      widget.item.nutriments.forEach((key, value) {
+        if (value != '' && key.endsWith('_100g')) {
+          var totalKey = key.replaceAll('_100g', '');
+          var parts = totalKey.split('-');
+          var title = parts.map((p) => "${p[0].toUpperCase()}${p.substring(1)}").join(' ');
+          var totalValue = widget.item.nutriments[totalKey];
+          if (value is double)
+            value = value.toStringAsPrecision(2);
+          if (totalValue is double)
+            totalValue = totalValue.toStringAsPrecision(2);
+          nutritionRows.add(DataRow(cells: [
+            DataCell(Text(title)),
+            // DataCell(Text(totalValue)),
+            DataCell(Text(value)),
+          ]));
+        }
+      });
+    }
+    if (widget.item.ingredients != null) {
+      for (var ingredient in widget.item.ingredients) {
+        print(ingredient);
+      }
+    }
+
     return Scaffold(
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
@@ -32,10 +59,12 @@ class _ItemPageState extends State<ItemPage> {
               flexibleSpace: FlexibleSpaceBar(
                 collapseMode: CollapseMode.parallax,
                 centerTitle: true,
-                title: Text(widget.item.name),
-                background: widget.item.imageUrl != null ?
-                    Image.network(widget.item.imageUrl, fit: BoxFit.cover) :
-                    Container(color: SennesApp.primaryColor,),
+                title: Text(widget.item.displayName),
+                background: widget.item.imageUrl != null
+                    ? Image.network(widget.item.imageUrl, fit: BoxFit.cover)
+                    : Container(
+                        color: SennesApp.primaryColor,
+                      ),
               ),
             )
           ];
@@ -43,7 +72,7 @@ class _ItemPageState extends State<ItemPage> {
         body: Padding(
           padding: EdgeInsets.all(0.0),
           child: ListView(
-            padding: EdgeInsets.only(left:16.0, right: 16.0, top: 16.0),
+            padding: EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0),
             children: <Widget>[
               Text(
                 "Manufacturer information",
@@ -55,7 +84,8 @@ class _ItemPageState extends State<ItemPage> {
               Container(
                 height: 8.0,
               ),
-              Text(widget.item.manufacturerNote,
+              Text(
+                widget.item.manufacturerNote,
                 textAlign: TextAlign.justify,
               ),
               Container(
@@ -71,12 +101,12 @@ class _ItemPageState extends State<ItemPage> {
                   fontSize: 20.0,
                 ),
               ),
-              Text(
-                "per 100g",
-                style: TextStyle(
-                  fontSize: 12.0,
-                ),
-              ),
+              // Text(
+              //   "per 100g",
+              //   style: TextStyle(
+              //     fontSize: 12.0,
+              //   ),
+              // ),
               Container(
                 height: 8.0,
               ),
@@ -86,42 +116,20 @@ class _ItemPageState extends State<ItemPage> {
                     label: Text("Attribute"),
                     numeric: false,
                   ),
+                  // DataColumn(
+                  //   label: Text("Total"),
+                  //   numeric: true,
+                  // ),
                   DataColumn(
-                    label: Text("Value"),
+                    label: Text("per 100g"),
                     numeric: true,
                   ),
-                  DataColumn(
-                    label: Text("%Daily"),
-                    numeric: true,
-                  ),
+                  // DataColumn(
+                  //   label: Text("%Daily"),
+                  //   numeric: true,
+                  // ),
                 ],
-                rows: [
-                  DataRow(cells: [
-                    DataCell(Text("Calories")),
-                    DataCell(Text("402")),
-                    DataCell(Text("18%")),
-                  ]),
-                  DataRow(cells: [
-                    DataCell(Text("Total Fat")),
-                    DataCell(Text("33g")),
-                    DataCell(Text("50%")),
-                  ]),
-                  DataRow(cells: [
-                    DataCell(Text("Cholesterol")),
-                    DataCell(Text("105mg")),
-                    DataCell(Text("35%")),
-                  ]),
-                  DataRow(cells: [
-                    DataCell(Text("Sodium")),
-                    DataCell(Text("621mg")),
-                    DataCell(Text("25%")),
-                  ]),
-                  DataRow(cells: [
-                    DataCell(Text("Potassium")),
-                    DataCell(Text("98mg")),
-                    DataCell(Text("2%")),
-                  ]),
-                ],
+                rows: nutritionRows,
               ),
             ],
           ),

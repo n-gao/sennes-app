@@ -67,7 +67,10 @@ class Item extends Comparable<Item> {
   }
 
   get displayName {
-    return name ?? barcode;
+    if (name != null) {
+      return (brand ?? '') + name;
+    }
+    return barcode;
   }
 
   get addedDate {

@@ -75,9 +75,9 @@ class _ItemWidgetState extends State<ItemWidget> {
         color: Colors.white,
         type: MaterialType.card,
         clipBehavior: Clip.antiAlias,
-        child: loaded && item.imageUrl != null
+        child: loaded && (item.imageUrl != null || item.thumbnail != null)
             ? Image.network(
-                item.imageUrl,
+                item.thumbnail ?? item.imageUrl,
                 width: 48.0,
                 height: 48.0,
                 fit: BoxFit.cover,

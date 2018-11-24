@@ -198,7 +198,10 @@ class _StartPageState extends State<StartPage> {
       Navigator.pop(context);
       _formKey.currentState.save();
       setState(() {
-        controller?.increase(name: toAdd);
+        dynamic barcode = int.tryParse(toAdd);
+        if (barcode != null)
+          barcode = barcode.toString();
+        controller?.increase(name: toAdd, barcode: barcode);
       });
     }
   }
