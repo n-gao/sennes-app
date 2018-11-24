@@ -15,6 +15,7 @@ class Configuration {
   String _encryptionKey;
 
   Future getFridgeId() async {
+    return 2;
     if (_fridgeId == null) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       _fridgeId = prefs.getInt('fridge_id');
