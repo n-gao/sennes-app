@@ -23,18 +23,18 @@ class Item extends Comparable<Item> {
 
   Item({
     this.barcode,
-    this.name = null,
+    this.name,
     this.amount = 1,
     this.size = '',
-    this.imageUrl = null,
-    this.thumbnail = null,
+    this.imageUrl,
+    this.thumbnail,
     this.manufacturerNote = '',
     this.changed,
     this.website = '',
     this.brand = '',
     this.dataComplete = false,
-    this.ingredients = null,
-    this.nutriments = null,
+    this.ingredients,
+    this.nutriments,
   }) {
     changed = changed ?? [DateTime.now()];
   }
@@ -46,7 +46,7 @@ class Item extends Comparable<Item> {
   void updateInfo(Map<String, dynamic> update) {
     this.name = readUpdate(update, 'product_name', null);
     this.imageUrl = readUpdate(update, 'image_url', null);
-    this.thumbnail = readUpdate(update, 'image_front_thumb_url', null);
+    this.thumbnail = readUpdate(update, 'image_thumb_url', null);
     this.size = readUpdate(update, 'quantity', '');
     this.manufacturerNote =
         readUpdate(update, 'usage', 'No information provided');
@@ -66,9 +66,14 @@ class Item extends Comparable<Item> {
     return barcode ?? name.toLowerCase();
   }
 
+  get titleName {
+    var result = displayName;
+    return result.length > 12 ? name : result;
+  }
+
   get displayName {
     if (name != null) {
-      return (brand ?? '') + name;
+      return brand != null ? [brand, name].join(' ') : name;
     }
     return barcode;
   }

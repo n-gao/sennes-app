@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'item.dart';
 import 'main.dart';
+import 'dart:math';
 
 class ItemPage extends StatefulWidget {
   ItemPage({Key key, this.item}) : super(key: key);
@@ -12,6 +13,15 @@ class ItemPage extends StatefulWidget {
 }
 
 class _ItemPageState extends State<ItemPage> {
+  static const keys = [
+    'energy',
+    'fat',
+    'saturated-fat',
+    'carbohydrates',
+    'sugars',
+    'proteins',
+    'salt'
+  ];
 
   @override
   void initState() {}
@@ -23,23 +33,39 @@ class _ItemPageState extends State<ItemPage> {
   Widget build(BuildContext context) {
     List<DataRow> nutritionRows = List<DataRow>();
     if (widget.item.nutriments != null) {
-      widget.item.nutriments.forEach((key, value) {
-        if (value != '' && key.endsWith('_100g')) {
-          var totalKey = key.replaceAll('_100g', '');
-          var parts = totalKey.split('-');
-          var title = parts.map((p) => "${p[0].toUpperCase()}${p.substring(1)}").join(' ');
-          var totalValue = widget.item.nutriments[totalKey];
-          if (value is double)
-            value = value.toStringAsPrecision(2);
-          if (totalValue is double)
-            totalValue = totalValue.toStringAsPrecision(2);
-          nutritionRows.add(DataRow(cells: [
-            DataCell(Text(title)),
-            // DataCell(Text(totalValue)),
-            DataCell(Text(value)),
-          ]));
-        }
-      });
+      for (var key in keys) {
+        var value = widget.item.nutriments[key + "_100g"] ?? "—";
+        var parts = key.split('-');
+        var title = parts.map((p) => "${p[0].toUpperCase()}${p.substring(1)}").join(' ');
+        var unit = widget.item.nutriments[key + "_unit"] ?? "";
+        if (value is double)
+          value = ((value*100).round()/100).toString();
+        if (value == null)
+          value = "--";
+        unit = ' ' + unit;
+        nutritionRows.add(DataRow(cells: [
+          DataCell(Text(title)),
+          // DataCell(Text(totalValue)),
+          DataCell(Text(value + unit)),
+        ]));
+      }
+      // widget.item.nutriments.forEach((key, value) {
+      //   if (value != '' && key.endsWith('_100g')) {
+      //     var totalKey = key.replaceAll('_100g', '');
+      //     var parts = totalKey.split('-');
+      //     var title = parts.map((p) => "${p[0].toUpperCase()}${p.substring(1)}").join(' ');
+      //     var totalValue = widget.item.nutriments[totalKey];
+      //     if (value is double)
+      //       value = value.toStringAsPrecision(2);
+      //     if (totalValue is double)
+      //       totalValue = totalValue.toStringAsPrecision(2);
+      //     nutritionRows.add(DataRow(cells: [
+      //       DataCell(Text(title)),
+      //       // DataCell(Text(totalValue)),
+      //       DataCell(Text(value)),
+      //     ]));
+      //   }
+      // });
     }
     if (widget.item.ingredients != null) {
       for (var ingredient in widget.item.ingredients) {

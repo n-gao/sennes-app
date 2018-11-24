@@ -36,7 +36,7 @@ class _ItemWidgetState extends State<ItemWidget> {
   }
 
   Future<void> requestItemData() async {
-    if (item == null || item.dataComplete) return;
+    // if (item == null || item.dataComplete) return;
     var con = await controller;
     await con.requestItemInfos([item]);
     if (mounted) setState(() {});
@@ -121,7 +121,6 @@ class _ItemWidgetState extends State<ItemWidget> {
           onSwipeLeft: () {
             controller.then((con) {
               con.increase(index: widget.index);
-              print(widget.item);
               setState(() {print(item.amount);});
             });
           },
