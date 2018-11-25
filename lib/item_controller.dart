@@ -149,6 +149,7 @@ class ItemController {
   }
 
   void increase({String barcode, String name, int index}) {
+    print("Increased");
     if (barcode == null && name == null && index != null) {
       barcode = inventory[index].barcode;
       name = inventory[index].name;

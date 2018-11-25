@@ -59,7 +59,7 @@ class Item extends Comparable<Item> {
 
   @override
   int compareTo(Item other) {
-    return this.name.toLowerCase().compareTo(other.name.toLowerCase());
+    return this.displayName.toLowerCase().compareTo(other.displayName.toLowerCase());
   }
 
   get identifier {

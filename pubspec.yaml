@@ -32,6 +32,8 @@ dependencies:
   shimmer: ^0.0.5
   swipeable: ^1.0.0+1
   pointycastle: 1.0.0-rc4
+  qr_mobile_vision : ^0.1.0
+  cached_network_image: ^0.6.0-alpha.2
 
 dev_dependencies:
   build_runner: ^1.0.0

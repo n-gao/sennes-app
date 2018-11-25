@@ -150,7 +150,9 @@ class _StartPageState extends State<StartPage> {
                     separatorBuilder: _buildSeperator),
             key: _refreshIndicatorKey,
             onRefresh: () {
-              return controller?.requestItemUpdates();
+              if (controller == null)
+                return Future.delayed(Duration(seconds: 1));
+              return controller.requestItemUpdates();
             },
           ),
         ),
@@ -199,8 +201,7 @@ class _StartPageState extends State<StartPage> {
       _formKey.currentState.save();
       setState(() {
         dynamic barcode = int.tryParse(toAdd);
-        if (barcode != null)
-          barcode = barcode.toString();
+        if (barcode != null) barcode = barcode.toString();
         controller?.increase(name: toAdd, barcode: barcode);
       });
     }
@@ -243,7 +244,13 @@ class _StartPageState extends State<StartPage> {
                       children: <Widget>[
                         IconButton(
                           icon: Icon(Icons.camera_alt),
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ScanPage()),
+                            );
+                          },
                         ),
                         Expanded(
                           child: TextFormField(
@@ -300,10 +307,10 @@ class _StartPageState extends State<StartPage> {
     switch (option) {
       case _StartPagePopupMenu.Settings:
         return (context) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ScanPage()),
-          );
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(builder: (context) => ScanPage()),
+          // );
         };
       default:
         return (context) {};

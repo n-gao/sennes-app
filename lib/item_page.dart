@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'item.dart';
 import 'main.dart';
-import 'dart:math';
 
 class ItemPage extends StatefulWidget {
   ItemPage({Key key, this.item}) : super(key: key);
@@ -85,7 +84,7 @@ class _ItemPageState extends State<ItemPage> {
               flexibleSpace: FlexibleSpaceBar(
                 collapseMode: CollapseMode.parallax,
                 centerTitle: true,
-                title: Text(widget.item.displayName),
+                title: Text(widget.item.titleName),
                 background: widget.item.imageUrl != null
                     ? Image.network(widget.item.imageUrl, fit: BoxFit.cover)
                     : Container(
