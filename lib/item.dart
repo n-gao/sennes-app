@@ -1,6 +1,5 @@
 import 'package:intl/intl.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'dart:math';
 
 part 'item.g.dart';
 
@@ -28,7 +27,7 @@ class Item extends Comparable<Item> {
     this.size = '',
     this.imageUrl,
     this.thumbnail,
-    this.manufacturerNote = '',
+    this.manufacturerNote = 'No information provided',
     this.changed,
     this.website = '',
     this.brand = '',
@@ -44,16 +43,16 @@ class Item extends Comparable<Item> {
   }
 
   void updateInfo(Map<String, dynamic> update) {
-    this.name = readUpdate(update, 'product_name', null);
-    this.imageUrl = readUpdate(update, 'image_url', null);
-    this.thumbnail = readUpdate(update, 'image_thumb_url', null);
-    this.size = readUpdate(update, 'quantity', '');
+    this.name = readUpdate(update, 'product_name', this.name);
+    this.imageUrl = readUpdate(update, 'image_url', this.imageUrl);
+    this.thumbnail = readUpdate(update, 'image_thumb_url', this.thumbnail);
+    this.size = readUpdate(update, 'quantity', this.size);
     this.manufacturerNote =
-        readUpdate(update, 'usage', 'No information provided');
-    this.ingredients = readUpdate(update, 'ingredients', null);
-    this.website = readUpdate(update, 'product_web_page', null);
-    this.nutriments = readUpdate(update, 'nutriments', null);
-    this.brand = readUpdate(update, 'brands', '');
+        readUpdate(update, 'usage', this.manufacturerNote);
+    this.ingredients = readUpdate(update, 'ingredients', this.ingredients);
+    this.website = readUpdate(update, 'product_web_page', this.website);
+    this.nutriments = readUpdate(update, 'nutriments', this.nutriments);
+    this.brand = readUpdate(update, 'brands', this.brand);
     this.dataComplete = true;
   }
 
@@ -86,7 +85,7 @@ class Item extends Comparable<Item> {
   }
 
   DateTime get addedDate {
-    return changed.last;
+    return changed.length == 0 ? DateTime.now() : changed.last;
   }
 
   String get dateString {
@@ -96,13 +95,13 @@ class Item extends Comparable<Item> {
     if (diff.inMinutes < 1)
       return "just now";
     if (diff.inHours < 1)
-      return "${diff.inMinutes}mins ago";
+      return "${diff.inMinutes}m ago";
     if (diff.inDays < 1)
-      return "${diff.inHours}hours ago";
+      return "${diff.inHours}h ago";
     if (diff.inDays < 7)
-      return "${diff.inDays}days ago";
+      return "${diff.inDays}d ago";
     if (diff.inDays < 30)
-      return "${diff.inDays~/7}weeks ago";
+      return "${diff.inDays~/7}w ago";
     return DateFormat("dd.MM.yy").format(last);
   }
 

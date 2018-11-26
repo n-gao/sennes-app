@@ -17,7 +17,7 @@ class ItemUpdate {
 
   Map<String, dynamic> toJson() => _$ItemUpdateToJson(this);
 
-  get identifier {
+  String get identifier {
     return barcode ?? name.toLowerCase();
   }
 }

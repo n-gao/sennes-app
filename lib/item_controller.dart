@@ -26,7 +26,7 @@ class ItemController {
   int _safeState = -1;
 
   List<Item> get inventory {
-    var result = _inventory.where((item) => item.amount > 0).toList();
+    var result = _inventory.where((item) => item.amount > 0 && item.displayName != null).toList();
     result.sort();
     return result;
   }
@@ -130,6 +130,8 @@ class ItemController {
   }
 
   void applyUpdate(ItemUpdate update) {
+    if (update.barcode == null && update.name == null)
+      return;
     confirmed = false;
     _applyUpdate(update);
     uploadUpdate(update);
@@ -151,7 +153,6 @@ class ItemController {
   }
 
   void increase({String barcode, String name, int index}) {
-    print("Increased");
     if (barcode == null && name == null && index != null) {
       barcode = inventory[index].barcode;
       name = inventory[index].name;
@@ -183,7 +184,6 @@ class ItemController {
     if (!_inventoryMap.containsKey(item.identifier)) {
       _inventoryMap[item.identifier] = item;
       _inventory.add(item);
-      // _inventory.sort();
     }
   }
 

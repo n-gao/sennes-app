@@ -91,7 +91,7 @@ class _ItemWidgetState extends State<ItemWidget> {
       ),
       title: loaded ? Text(item.displayName) : Container(),
       subtitle: loaded ? Text("${item.amount}x ${item.size}") : Container(),
-      trailing: loaded ? Text("scanned ${item.dateString}") : Container(),
+      trailing: loaded ? Text(item.dateString) : Container(),
       onTap: loaded
           ? () {
               Navigator.push(
