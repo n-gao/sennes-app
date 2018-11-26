@@ -50,6 +50,7 @@ class _ScanPageState extends State<ScanPage> {
                     final scaffold = Scaffold.of(context);
                     final snackbar = SnackBar(
                       content: Text("Scanned $code"),
+                      duration: Duration(seconds: 2),
                     );
                     scaffold.showSnackBar(snackbar);
                   }

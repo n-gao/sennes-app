@@ -140,9 +140,12 @@ class ItemController {
   void _applyUpdate(ItemUpdate update) {
     DateTime time = DateTime.fromMillisecondsSinceEpoch(update.timestamp);
     if (_inventoryMap.containsKey(update.identifier)) {
-      _inventoryMap[update.identifier].amount += update.method == 0 ? 1 : -1;
-      _inventoryMap[update.identifier].changed.add(time);
-      var index = inventory.indexOf(_inventoryMap[update.identifier]);
+      final item = _inventoryMap[update.identifier];
+      item.amount += update.method == 0 ? 1 : -1;
+      if (item.amount < 0)
+        item.amount = 0;
+      item.changed.add(time);
+      final index = inventory.indexOf(item);
       getItemCallbacks(index).forEach((c) => c());
     } else {
       add(Item(barcode: update.barcode, name: update.name, changed: [time]));
