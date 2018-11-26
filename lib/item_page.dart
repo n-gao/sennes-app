@@ -71,6 +71,7 @@ class _ItemPageState extends State<ItemPage> {
                     ? CachedNetworkImage(
                         imageUrl: widget.item.imageUrl,
                         fit: BoxFit.cover,
+                        fadeInDuration: Duration(milliseconds: 200),
                       ) // Image.network(widget.item.imageUrl, fit: BoxFit.cover)
                     : Container(
                         color: SennesApp.primaryColor,

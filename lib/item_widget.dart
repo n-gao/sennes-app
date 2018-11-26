@@ -44,15 +44,29 @@ class _ItemWidgetState extends State<ItemWidget> {
     if (mounted) setState(() {});
   }
 
+  void _onItemChanged() {
+    if (mounted)
+      setState(() {});
+  }
+
   Future<void> requestItem() async {
     if (widget.index != null) {
       var con = await controller;
+      con.addItemCallback(widget.index, _onItemChanged);
       if (mounted)
         setState(() {
           this._controller = con;
           requestItemData();
         });
     }
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    if (widget.index != null)
+      _controller?.removeItemCallback(widget.index, _onItemChanged);
   }
 
   @override
@@ -64,6 +78,8 @@ class _ItemWidgetState extends State<ItemWidget> {
   @override
   void didUpdateWidget(oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.index != null)
+      _controller?.removeItemCallback(oldWidget.index, _onItemChanged);
     requestItem();
   }
 
@@ -82,6 +98,7 @@ class _ItemWidgetState extends State<ItemWidget> {
               imageUrl: item.thumbnail ?? item.imageUrl,
               width: 48.0,
               height: 48.0,
+              fadeInDuration: Duration(milliseconds: 200),
               fit: BoxFit.cover,
             )
             // Image.network(
@@ -137,20 +154,14 @@ class _ItemWidgetState extends State<ItemWidget> {
         onSwipeRightToLeft: () {
           controller.then((con) {
             con.decrease(index: widget.index);
-            setState(() {
-              print(item.amount);
-            });
           });
         },
         onSwipeLeftToRight: () {
           controller.then((con) {
             con.increase(index: widget.index);
-            setState(() {
-              print(item.amount);
-            });
           });
         },
-        threshold: 96.0,
+        threshold: 64.0,
         child: listTile,
       );
       if (widget.animation != null) {

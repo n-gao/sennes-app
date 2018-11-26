@@ -12,14 +12,13 @@ import 'item_update.dart';
 import 'encrypt_util.dart';
 import 'dart:core';
 
-typedef void InventoryChanged();
-
 class ItemController {
   final cryptor = PlatformStringCryptor();
   final Configuration config;
   Map<String, Item> _inventoryMap = Map();
   List<Item> _inventory = [];
-  InventoryChanged _changedCallback;
+  VoidCallback _changedCallback;
+  Map<int, List<VoidCallback>> _itemCallbacks = Map();
   int _state = 0;
 
   List<Item> _safeInventory = [];
@@ -143,19 +142,40 @@ class ItemController {
     if (_inventoryMap.containsKey(update.identifier)) {
       _inventoryMap[update.identifier].amount += update.method == 0 ? 1 : -1;
       _inventoryMap[update.identifier].changed.add(time);
+      var index = inventory.indexOf(_inventoryMap[update.identifier]);
+      getItemCallbacks(index).forEach((c) => c());
     } else {
       add(Item(barcode: update.barcode, name: update.name, changed: [time]));
     }
   }
 
-  void setChangedCallback(InventoryChanged callback) {
+  void addItemCallback(int index, VoidCallback callback) {
+    if (!_itemCallbacks.containsKey(index))
+      _itemCallbacks[index] = List<VoidCallback>();
+    _itemCallbacks[index].add(callback);
+  }
+
+  void removeItemCallback(int index, VoidCallback callback) {
+    if (!_itemCallbacks.containsKey(index)) {
+      _itemCallbacks[index].remove(callback);
+    }
+  }
+
+  List<VoidCallback> getItemCallbacks(int index) {
+    if (_itemCallbacks.containsKey(index))
+      return _itemCallbacks[index];
+    return [];
+  }
+
+  void setChangedCallback(VoidCallback callback) {
     this._changedCallback = callback;
   }
 
   void increase({String barcode, String name, int index}) {
     if (barcode == null && name == null && index != null) {
-      barcode = inventory[index].barcode;
-      name = inventory[index].name;
+      final inv = inventory;
+      barcode = inv[index].barcode;
+      name = inv[index].name;
     }
     var update = ItemUpdate(
         name: name,
