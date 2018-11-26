@@ -23,7 +23,8 @@ class _ItemWidgetState extends State<ItemWidget> {
   ItemController _controller;
 
   Item get item {
-    return widget.item ?? (_controller != null ? _controller[widget.index] : null);
+    return widget.item ??
+        (_controller != null ? _controller[widget.index] : null);
   }
 
   get loaded {
@@ -36,7 +37,7 @@ class _ItemWidgetState extends State<ItemWidget> {
   }
 
   Future<void> requestItemData() async {
-    // if (item == null || item.dataComplete) return;
+    if (item == null || item.dataComplete) return;
     var con = await controller;
     await con.requestItemInfos([item]);
     if (mounted) setState(() {});
@@ -67,7 +68,7 @@ class _ItemWidgetState extends State<ItemWidget> {
 
   @override
   Widget build(BuildContext context) {
-    var listTile = ListTile(
+    Widget listTile = ListTile(
       leading: Material(
         shape:
             BeveledRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
@@ -100,32 +101,51 @@ class _ItemWidgetState extends State<ItemWidget> {
             }
           : null,
     );
+
+    if (_controller != null && _controller.length != (widget.index??-1) + 1)
+    listTile = Column(children: <Widget>[
+      listTile,
+      Padding(
+        padding: EdgeInsets.only(left: 64.0, right: 16.0),
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border(bottom: BorderSide(color: Colors.grey.shade100)),
+          ),
+        ),
+      ),
+    ]);
+
     if (loaded) {
       var swipeable = Swipeable(
-          background: Container(
-            color: Colors.green,
-            alignment: Alignment(-0.9, 0.0),
-            child: Icon(Icons.add, color: Colors.white),
-          ),
-          secondaryBackground: Container(
-            color: Colors.red,
-            alignment: Alignment(0.9, 0.0),
-            child: Icon(Icons.remove, color: Colors.white),
-          ),
-          onSwipeRight: () {
-            controller.then((con) { 
-              con.decrease(index: widget.index);
-              setState(() {print(item.amount);});
+        background: Container(
+          color: Colors.green,
+          alignment: Alignment(-0.9, 0.0),
+          child: Icon(Icons.add, color: Colors.white),
+        ),
+        secondaryBackground: Container(
+          color: Colors.red,
+          alignment: Alignment(0.9, 0.0),
+          child: Icon(Icons.remove, color: Colors.white),
+        ),
+        onSwipeRight: () {
+          controller.then((con) {
+            con.decrease(index: widget.index);
+            setState(() {
+              print(item.amount);
             });
-          },
-          onSwipeLeft: () {
-            controller.then((con) {
-              con.increase(index: widget.index);
-              setState(() {print(item.amount);});
+          });
+        },
+        onSwipeLeft: () {
+          controller.then((con) {
+            con.increase(index: widget.index);
+            setState(() {
+              print(item.amount);
             });
-          },
-          threshold: 128.0,
-          child: listTile);
+          });
+        },
+        threshold: 96.0,
+        child: listTile,
+      );
       if (widget.animation != null) {
         return SizeTransition(
             axis: Axis.vertical,

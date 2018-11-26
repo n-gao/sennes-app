@@ -143,11 +143,10 @@ class _StartPageState extends State<StartPage> {
                     key: _listKey,
                     initialItemCount: listModel.length,
                   )
-                : ListView.separated(
-                    itemCount: controller != null ? controller.length : 15,
+                : ListView.builder(
+                    itemCount: 15,
                     itemBuilder: _buildItem,
-                    physics: PageScrollPhysics(),
-                    separatorBuilder: _buildSeperator),
+                    physics: PageScrollPhysics()),
             key: _refreshIndicatorKey,
             onRefresh: () {
               if (controller == null)
@@ -205,17 +204,6 @@ class _StartPageState extends State<StartPage> {
         controller?.increase(name: toAdd, barcode: barcode);
       });
     }
-  }
-
-  Widget _buildSeperator(context, index) {
-    return Padding(
-      padding: EdgeInsets.only(left: 64.0, right: 16.0),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: Colors.grey.shade100)),
-        ),
-      ),
-    );
   }
 
   Widget _buildAnimatedItem(context, index, animation) {

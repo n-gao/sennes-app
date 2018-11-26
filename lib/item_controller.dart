@@ -26,7 +26,9 @@ class ItemController {
   int _safeState = -1;
 
   List<Item> get inventory {
-    return _inventory.where((item) => item.amount > 0).toList();
+    var result = _inventory.where((item) => item.amount > 0).toList();
+    result.sort();
+    return result;
   }
 
   bool confirmed;
@@ -181,7 +183,7 @@ class ItemController {
     if (!_inventoryMap.containsKey(item.identifier)) {
       _inventoryMap[item.identifier] = item;
       _inventory.add(item);
-      _inventory.sort();
+      // _inventory.sort();
     }
   }
 

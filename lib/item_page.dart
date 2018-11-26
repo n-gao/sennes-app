@@ -39,32 +39,14 @@ class _ItemPageState extends State<ItemPage> {
         var unit = widget.item.nutriments[key + "_unit"] ?? "";
         if (value is double)
           value = ((value*100).round()/100).toString();
-        if (value == null)
-          value = "--";
-        unit = ' ' + unit;
+        if (unit != "")
+          unit = ' ' + unit;
         nutritionRows.add(DataRow(cells: [
           DataCell(Text(title)),
           // DataCell(Text(totalValue)),
           DataCell(Text(value + unit)),
         ]));
       }
-      // widget.item.nutriments.forEach((key, value) {
-      //   if (value != '' && key.endsWith('_100g')) {
-      //     var totalKey = key.replaceAll('_100g', '');
-      //     var parts = totalKey.split('-');
-      //     var title = parts.map((p) => "${p[0].toUpperCase()}${p.substring(1)}").join(' ');
-      //     var totalValue = widget.item.nutriments[totalKey];
-      //     if (value is double)
-      //       value = value.toStringAsPrecision(2);
-      //     if (totalValue is double)
-      //       totalValue = totalValue.toStringAsPrecision(2);
-      //     nutritionRows.add(DataRow(cells: [
-      //       DataCell(Text(title)),
-      //       // DataCell(Text(totalValue)),
-      //       DataCell(Text(value)),
-      //     ]));
-      //   }
-      // });
     }
     if (widget.item.ingredients != null) {
       for (var ingredient in widget.item.ingredients) {
@@ -121,17 +103,11 @@ class _ItemPageState extends State<ItemPage> {
                 height: 8.0,
               ),
               Text(
-                "Nutrition Facts",
+                "Nutriments",
                 style: TextStyle(
                   fontSize: 20.0,
                 ),
               ),
-              // Text(
-              //   "per 100g",
-              //   style: TextStyle(
-              //     fontSize: 12.0,
-              //   ),
-              // ),
               Container(
                 height: 8.0,
               ),
@@ -141,18 +117,10 @@ class _ItemPageState extends State<ItemPage> {
                     label: Text("Attribute"),
                     numeric: false,
                   ),
-                  // DataColumn(
-                  //   label: Text("Total"),
-                  //   numeric: true,
-                  // ),
                   DataColumn(
                     label: Text("per 100g"),
                     numeric: true,
                   ),
-                  // DataColumn(
-                  //   label: Text("%Daily"),
-                  //   numeric: true,
-                  // ),
                 ],
                 rows: nutritionRows,
               ),

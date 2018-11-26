@@ -67,13 +67,20 @@ class Item extends Comparable<Item> {
   }
 
   get titleName {
-    var result = displayName;
-    return result.length > 12 ? name : result;
+    var result = fullName;
+    return result.length > 20 ? name : result;
   }
 
   get displayName {
+    return name ?? barcode;
+  }
+
+  get fullName {
     if (name != null) {
-      return brand != null ? [brand, name].join(' ') : name;
+      if (brand != "" && brand != null) {
+        return "$brand $name";
+      }
+      return name;
     }
     return barcode;
   }
