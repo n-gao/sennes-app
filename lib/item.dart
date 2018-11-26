@@ -85,11 +85,12 @@ class Item extends Comparable<Item> {
     return barcode;
   }
 
-  get addedDate {
-    return DateTime.now();
+  DateTime get addedDate {
+    return changed.last;
   }
 
   String get dateString {
+    final now = DateTime.now();
     return DateFormat("dd.MM.yy").format(addedDate.toLocal());
   }
 
