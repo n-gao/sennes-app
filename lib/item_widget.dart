@@ -4,6 +4,7 @@ import 'item_page.dart';
 import 'item_controller.dart';
 import 'package:shimmer/shimmer.dart';
 import 'swipeable.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ItemWidget extends StatefulWidget {
   ItemWidget({Key key, this.index, this.item, this.animation})
@@ -77,12 +78,18 @@ class _ItemWidgetState extends State<ItemWidget> {
         type: MaterialType.card,
         clipBehavior: Clip.antiAlias,
         child: loaded && (item.imageUrl != null || item.thumbnail != null)
-            ? Image.network(
-                item.thumbnail ?? item.imageUrl,
-                width: 48.0,
-                height: 48.0,
-                fit: BoxFit.cover,
-              )
+            ? CachedNetworkImage(
+              imageUrl: item.thumbnail ?? item.imageUrl,
+              width: 48.0,
+              height: 48.0,
+              fit: BoxFit.cover,
+            )
+            // Image.network(
+            //     item.thumbnail ?? item.imageUrl,
+            //     width: 48.0,
+            //     height: 48.0,
+            //     fit: BoxFit.cover,
+            //   )
             : Container(
                 width: 48.0,
                 height: 48.0,
@@ -127,7 +134,7 @@ class _ItemWidgetState extends State<ItemWidget> {
           alignment: Alignment(0.9, 0.0),
           child: Icon(Icons.remove, color: Colors.white),
         ),
-        onSwipeRight: () {
+        onSwipeRightToLeft: () {
           controller.then((con) {
             con.decrease(index: widget.index);
             setState(() {
@@ -135,7 +142,7 @@ class _ItemWidgetState extends State<ItemWidget> {
             });
           });
         },
-        onSwipeLeft: () {
+        onSwipeLeftToRight: () {
           controller.then((con) {
             con.increase(index: widget.index);
             setState(() {

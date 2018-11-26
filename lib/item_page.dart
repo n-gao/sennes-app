@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'item.dart';
 import 'main.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ItemPage extends StatefulWidget {
   ItemPage({Key key, this.item}) : super(key: key);
@@ -35,10 +36,11 @@ class _ItemPageState extends State<ItemPage> {
       for (var key in keys) {
         var value = widget.item.nutriments[key + "_100g"] ?? "—";
         var parts = key.split('-');
-        var title = parts.map((p) => "${p[0].toUpperCase()}${p.substring(1)}").join(' ');
+        var title = parts
+            .map((p) => "${p[0].toUpperCase()}${p.substring(1)}")
+            .join(' ');
         var unit = widget.item.nutriments[key + "_unit"] ?? "";
-        if (value is double)
-          value = ((value*100).round()/100).toString();
+        if (value is double) value = ((value * 100).round() / 100).toString();
         nutritionRows.add(DataRow(cells: [
           DataCell(Text(title)),
           // DataCell(Text(totalValue)),
@@ -66,7 +68,10 @@ class _ItemPageState extends State<ItemPage> {
                 centerTitle: true,
                 title: Text(widget.item.titleName),
                 background: widget.item.imageUrl != null
-                    ? Image.network(widget.item.imageUrl, fit: BoxFit.cover)
+                    ? CachedNetworkImage(
+                        imageUrl: widget.item.imageUrl,
+                        fit: BoxFit.cover,
+                      ) // Image.network(widget.item.imageUrl, fit: BoxFit.cover)
                     : Container(
                         color: SennesApp.primaryColor,
                       ),

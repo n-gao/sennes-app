@@ -103,7 +103,7 @@ class ItemController {
       var itemUpdate = ItemUpdate.fromJson(updateJson);
       _applyUpdate(itemUpdate);
     }
-    print("[Inventory] Updated state from $_state to ${response.newState.toString()}");
+    print("[Inventory] Updated state from $_state to ${response.newState}");
     _state = response.newState;
     _changedCallback?.call();
     await saveToStorage();

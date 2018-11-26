@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
 import 'package:qr_mobile_vision/qr_camera.dart';
 import 'item_controller.dart';
-import 'item_update.dart';
 
 class ScanPage extends StatefulWidget {
   ScanPage({Key key}) : super(key: key);
@@ -47,17 +45,13 @@ class _ScanPageState extends State<ScanPage> {
                 qrCodeCallback: (code) {
                   _scanned[code] =
                       _scanned.containsKey(code) ? _scanned[code] + 1 : 1;
-                  if (_scanned[code] == 5) {
+                  if (_scanned[code] == 10) {
                     _controller?.increase(barcode: code);
-                    print("Test1");
                     final scaffold = Scaffold.of(context);
-                    print("test2");
                     final snackbar = SnackBar(
                       content: Text("Scanned $code"),
                     );
-                    print("Snackbar");
                     scaffold.showSnackBar(snackbar);
-                    print("Scanned $code");
                   }
                 },
                 fit: BoxFit.cover,

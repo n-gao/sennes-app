@@ -6,10 +6,8 @@ class Swipeable extends StatefulWidget {
   final Widget child;
   final Widget background;
   final Widget secondaryBackground;
-  final VoidCallback onSwipeLeft;
-  final VoidCallback onSwipeRight;
-  final VoidCallback onSwipeCancel;
-  final VoidCallback onSwipeEnd;
+  final VoidCallback onSwipeLeftToRight;
+  final VoidCallback onSwipeRightToLeft;
   final double threshold;
 
   Swipeable({
@@ -17,10 +15,8 @@ class Swipeable extends StatefulWidget {
     this.child,
     this.background,
     this.secondaryBackground,
-    this.onSwipeLeft,
-    this.onSwipeRight,
-    this.onSwipeCancel,
-    this.onSwipeEnd,
+    this.onSwipeLeftToRight,
+    this.onSwipeRightToLeft,
     this.threshold = 64.0,
   }) : super(key: key);
 
@@ -53,12 +49,15 @@ class _SwipeableClipper extends CustomClipper<Rect> {
   }
 }
 
+enum SwipeDirection {
+  LeftToRight, RightToLeft, None
+}
+
 class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
   double _dragExtent = 0.0;
   AnimationController _moveController;
   Animation<Offset> _moveAnimation;
-  bool _pastLeftThreshold = false;
-  bool _pastRightThreshold = false;
+  SwipeDirection _direction = SwipeDirection.None;
 
   void initState() {
     super.initState();
@@ -76,7 +75,10 @@ class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
     _moveController.dispose();
   }
 
-  void _handleDragStart(DragStartDetails details) {}
+  void _handleDragStart(DragStartDetails details) {
+    _direction = SwipeDirection.None;
+    _dragExtent = 0.0;
+  }
 
   void _handleDragUpdate(DragUpdateDetails details) {
     var delta = details.primaryDelta;
@@ -87,6 +89,7 @@ class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
         _updateMoveAnimation();
       });
     }
+    
     if (!_moveController.isAnimating) {
       var movePastThresholdPixels = widget.threshold;
       var newPos = _dragExtent.abs() / context.size.width;
@@ -103,29 +106,14 @@ class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
         var adjustedPixelPos = movePastThresholdPixels * reducedThreshold;
         newPos = adjustedPixelPos / context.size.width;
 
-        if (_dragExtent > 0 && !_pastLeftThreshold) {
-          _pastLeftThreshold = true;
-
-          if (widget.onSwipeLeft != null) {
-            widget.onSwipeLeft();
-          }
+        if (_dragExtent > 0) {
+          _direction = SwipeDirection.LeftToRight;
         }
-        if (_dragExtent < 0 && !_pastRightThreshold) {
-          _pastRightThreshold = true;
-
-          if (widget.onSwipeRight != null) {
-            widget.onSwipeRight();
-          }
+        if (_dragExtent < 0) {
+          _direction = SwipeDirection.RightToLeft;
         }
       } else {
-        // Send a cancel event if the user has swiped back underneath the threshold
-        if (_pastLeftThreshold || _pastRightThreshold) {
-          if (widget.onSwipeCancel != null) {
-            widget.onSwipeCancel();
-          }
-        }
-        _pastLeftThreshold = false;
-        _pastRightThreshold = false;
+        _direction = SwipeDirection.None;
       }
 
       _moveController.animateTo(newPos);
@@ -134,11 +122,11 @@ class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
 
   void _handleDragEnd(DragEndDetails details) {
     _moveController.animateTo(0.0, duration: Duration(milliseconds: 200));
-    _dragExtent = 0.0;
 
-    if (widget.onSwipeEnd != null) {
-      widget.onSwipeEnd();
-    }
+    if (_direction == SwipeDirection.LeftToRight)
+      widget.onSwipeLeftToRight?.call();
+    if (_direction == SwipeDirection.RightToLeft)
+      widget.onSwipeRightToLeft?.call();
   }
 
   void _updateMoveAnimation() {
