@@ -91,7 +91,19 @@ class Item extends Comparable<Item> {
 
   String get dateString {
     final now = DateTime.now();
-    return DateFormat("dd.MM.yy").format(addedDate.toLocal());
+    final last = addedDate.toLocal();
+    final diff = now.difference(last);
+    if (diff.inMinutes < 1)
+      return "just now";
+    if (diff.inHours < 1)
+      return "${diff.inMinutes}mins ago";
+    if (diff.inDays < 1)
+      return "${diff.inHours}hours ago";
+    if (diff.inDays < 7)
+      return "${diff.inDays}days ago";
+    if (diff.inDays < 30)
+      return "${diff.inDays~/7}weeks ago";
+    return DateFormat("dd.MM.yy").format(last);
   }
 
   factory Item.fromJson(Map<String, dynamic> json) => _$ItemFromJson(json);

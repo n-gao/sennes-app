@@ -39,8 +39,6 @@ class _ItemPageState extends State<ItemPage> {
         var unit = widget.item.nutriments[key + "_unit"] ?? "";
         if (value is double)
           value = ((value*100).round()/100).toString();
-        if (unit != "")
-          unit = ' ' + unit;
         nutritionRows.add(DataRow(cells: [
           DataCell(Text(title)),
           // DataCell(Text(totalValue)),
