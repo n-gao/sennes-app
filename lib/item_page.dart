@@ -109,7 +109,7 @@ class _ItemPageState extends State<ItemPage> {
                 height: 8.0,
               ),
               Text(
-                "Nutriments",
+                "Nutrition facts",
                 style: TextStyle(
                   fontSize: 20.0,
                 ),
