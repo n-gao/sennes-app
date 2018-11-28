@@ -40,6 +40,8 @@ class _ItemPageState extends State<ItemPage> {
             .map((p) => "${p[0].toUpperCase()}${p.substring(1)}")
             .join(' ');
         var unit = widget.item.nutriments[key + "_unit"] ?? "";
+        if (unit == "" && value != "—")
+          unit = "g";
         if (value is double) value = ((value * 100).round() / 100).toString();
         nutritionRows.add(DataRow(cells: [
           DataCell(Text(title)),
