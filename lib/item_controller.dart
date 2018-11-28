@@ -132,9 +132,9 @@ class ItemController {
     if (update.barcode == null && update.name == null)
       return;
     confirmed = false;
-    // _applyUpdate(update);
+    _applyUpdate(update);
     uploadUpdate(update);
-    // _changedCallback?.call();
+    _changedCallback?.call();
   }
 
   void _applyUpdate(ItemUpdate update) {

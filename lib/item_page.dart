@@ -24,12 +24,6 @@ class _ItemPageState extends State<ItemPage> {
   ];
 
   @override
-  void initState() {}
-
-  @override
-  void dispose() {}
-
-  @override
   Widget build(BuildContext context) {
     List<DataRow> nutritionRows = List<DataRow>();
     if (widget.item.nutriments != null) {
